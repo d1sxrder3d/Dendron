@@ -7,7 +7,7 @@ namespace fs = std::filesystem;
 
 ProgramOptions parse_args(int argc, char* argv[]) {
     ProgramOptions options; 
-
+    
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
 
@@ -45,8 +45,8 @@ ProgramOptions parse_args(int argc, char* argv[]) {
                         throw std::exception();
                     }
                 } catch (const std::exception& e) {
-                    std::cerr << "Ошибка: Неверное значение для стиля. (безопасный режим, s = 0)" << std::endl;
-                    options.char_style = 0;
+                    std::cerr << "Ошибка: Неверное значение для стиля. (безопасный режим, s = 2)" << std::endl;
+                    options.char_style = 2;
                 }
             }
         } else if (arg == "-t" || arg == "--tree") {
@@ -76,7 +76,7 @@ ProgramOptions parse_args(int argc, char* argv[]) {
 }
 
 int main(int argc, char* argv[]) {
-    
+
     ProgramOptions options = parse_args(argc, argv);
     
     if (options.need_help) {
@@ -99,5 +99,7 @@ int main(int argc, char* argv[]) {
     TreeCLI my_tree(options.max_recursion_depth, options.char_style, options.tree_style, options.ignore_files, options.ignore_patterns);
     my_tree.display(options.directory_path);
 
+    
+    
     return 0;
 }
