@@ -1,2 +1,4 @@
 .vscode
 *test*
+*.out
+tree_cli
