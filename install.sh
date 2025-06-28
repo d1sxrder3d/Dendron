@@ -31,6 +31,9 @@ else
     echo "Config already exists at $CONFIG_DIR/config.ini. Not overwriting."
 fi
 
+echo "Cleaning up build files..."
+make -f "$MAKEFILE" clean
+
 echo ""
 echo "✅ Installation successful!"
 echo "You can now run the utility from anywhere by typing: ${TARGET}"
