@@ -1,78 +1,68 @@
 #include <iostream>
 #include <filesystem>
+#include "./tree.h"
+#include "./main.h" 
 
 namespace fs = std::filesystem;
 
+ProgramOptions parse_args(int argc, char* argv[]) {
+    ProgramOptions options; 
 
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
 
-std::string sub_path_cleaning(int path_length, const std::string& sub_path) {
-    if (path_length < 0) {
-        return sub_path; 
-    }
-
-    size_t start_pos = static_cast<size_t>(path_length) + 1;
-
-    if (start_pos > sub_path.size()) {
-        throw std::out_of_range("Invalid path_length");
-    }
-
-    return sub_path.substr(start_pos);
-}
-
-bool is_directory_empty_exceptions(const fs::path& dir_path) {
-    if (!fs::exists(dir_path) || !fs::is_directory(dir_path)) {
-        return false;
-    }
-    
-    fs::directory_iterator iter(dir_path);
-    return iter == fs::directory_iterator{};
-}
-
-void tree(const int& current_path_lenght, const fs::path& now_dir){
-    
-    if(is_directory_empty_exceptions(now_dir)){
-        return;
-    }
-    else{
-        for(const auto& entry : fs::directory_iterator(now_dir)){
-
-            std::string sub_path_clean = sub_path_cleaning(current_path_lenght, entry.path().string());
-
-            if (entry.is_directory()) {
-                std::cout << "dir: ";
-                std::cout << sub_path_clean << "\n";
-
-                tree(current_path_lenght + sub_path_clean.length() + 1, entry.path());
-
+        if (arg == "-d" || arg == "--directory") {
+            if (i + 1 < argc) {
+                options.directory_path = argv[++i];
+            } else {
+                std::cerr << "Ошибка: для аргумента " << arg << " требуется значение." << std::endl;
             }
-
-            else if (entry.is_regular_file()) {
-                std::cout << "file: ";
-
-                std::cout << sub_path_clean << "\n";
-                
-
+        } else if (arg == "-r" || arg == "--recursion") {
+            if (i + 1 < argc) {
+                try {
+                    options.max_recursion_depth = std::stoi(argv[++i]);
+                } catch (const std::exception& e) {
+                    std::cerr << "Ошибка: неверное значение для глубины рекурсии." << std::endl;
+                }
             }
-
-        
+        } else if (arg == "-t" || arg == "--tree") {
+            options.tree_style = true;
+        } else if (arg == "-h" || arg == "--help") {
+            options.need_help = true;
+            break; 
+        } else {
+            
+            if (options.directory_path.empty() && fs::exists(arg)) {
+                options.directory_path = arg;
+            } else {
+                std::cerr << "Неизвестный аргумент: " << arg << std::endl;
+                options.need_help = true;
+            }
         }
     }
 
+    return options;
 }
 
+int main(int argc, char* argv[]) {
+    ProgramOptions options = parse_args(argc, argv);
 
-int main(){
+    if (options.need_help) {
+        std::cout << "Использование: ./tree_cli [путь] [опции]\n"
+                  << "Опции:\n"
+                  << "  -d, --directory <путь>   Указать путь к директории\n"
+                  << "  -r, --recursion <число>  Установить максимальную глубину рекурсии\n"
+                  << "  -t, --tree               Сортировать файлы перед директориями\n"
+                  << "  -h, --help               Показать это сообщение\n";
+        return 0;
+    }
 
-    fs::path current_dir = fs::current_path();
+    if (options.directory_path.empty()) {
+        options.directory_path = fs::current_path();
+    }
     
-    int current_path_lenght = current_dir.string().length();
-    
-    std::cout << "Текущая дирректория: " << current_dir << "\n";
-    
-    tree(current_path_lenght, current_dir);
-    
+    TreeCLI my_tree(options.max_recursion_depth, options.char_style, options.tree_style);
+    my_tree.display(options.directory_path);
 
-    
     return 0;
 }
-
