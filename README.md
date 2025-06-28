@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="dosc/README_ru.md">Read this in Russian (Русская версия)</a>
+  <a href="[docs/README_ru.md](https://github.com/d1sxrder3d/Dendron/blob/main/docs/README_ru.md)">Read this in Russian (Русская версия)</a>
 </p>
 
 
