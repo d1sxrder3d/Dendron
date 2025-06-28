@@ -21,8 +21,17 @@ echo "Installing ${TARGET} to ${INSTALL_PATH}..."
 echo "This may require administrator privileges."
 sudo install -m 755 "$TARGET" "$INSTALL_PATH"
 
+echo "Installing configuration files..."
+CONFIG_DIR="$HOME/.config/dendron"
+mkdir -p "$CONFIG_DIR"
+if [ ! -f "$CONFIG_DIR/config.ini" ]; then
+    cp configs/config.ini "$CONFIG_DIR/"
+    echo "Default config created at $CONFIG_DIR/config.ini"
+else
+    echo "Config already exists at $CONFIG_DIR/config.ini. Not overwriting."
+fi
+
 echo ""
 echo "✅ Installation successful!"
 echo "You can now run the utility from anywhere by typing: ${TARGET}"
 echo "Example: ${TARGET} . -r 2"
-

@@ -22,5 +22,10 @@ if [ -f "$MAKEFILE" ]; then
     make -f "$MAKEFILE" clean
 fi
 
-echo "Uninstallation process finished."
+CONFIG_FILE="$HOME/.config/dendron/config.ini"
+if [ -f "$CONFIG_FILE" ]; then
+    rm "$CONFIG_FILE"
+    echo "✅ Default configuration file has been removed."
+fi
 
+echo "Uninstallation process finished."

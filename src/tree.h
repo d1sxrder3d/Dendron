@@ -72,11 +72,11 @@ private:
     // ╚═ or ┗━ or └─
     const std::string br_to_end_obj_;
     
-    // ║ or ┃ or │
+    // ║ or ┃ or │ 
     const std::string br_;
 
-    // Глубина рекурсии 
-    // "-1" - отключено
+    // Recursion depth
+    // "-1" - disabled
     const int max_recursion_depth_; 
     // 0 (default) - файлы ниже 
     // 1 - файлы выше

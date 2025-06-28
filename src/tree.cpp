@@ -25,7 +25,7 @@ void TreeCLI::display(const fs::path& directory_path) {
         
         tree_recursive(directory_path, "", 0);
     } else {
-        std::cerr << "Ошибка: Путь не существует: " << directory_path.string() << std::endl;
+        std::cerr << "Error: Path does not exist: " << directory_path.string() << std::endl;
     }
 }
 
@@ -83,8 +83,6 @@ bool TreeCLI::should_ignore(const std::string& filename) const {
 
 const char* TreeCLI::get_entry_color(const fs::directory_entry& entry) const {
     try {
-        // Проверку на ссылку нужно делать в первую очередь,
-        // так как ссылка может указывать на директорию или файл.
         if (entry.is_symlink()) {
             return COLOR_SYMLINK;
         }
@@ -105,7 +103,7 @@ const char* TreeCLI::get_entry_color(const fs::directory_entry& entry) const {
             }
         }
     } catch (const fs::filesystem_error&) {
-        // В случае ошибок (например, неверная символическая ссылка) используем цвет по умолчанию.
+        
     }
     return COLOR_REGULAR_FILE;
 }
@@ -153,11 +151,10 @@ void TreeCLI::tree_recursive(const fs::path& directory_path, const std::string& 
             const bool b_is_dir = b.is_directory();
 
             if (a_is_dir != b_is_dir) {
-                // tree_style_ == false (по умолчанию): директории сначала
-                // tree_style_ == true: файлы сначала
+                
                 return this->tree_style_ ? (a_is_dir < b_is_dir) : (a_is_dir > b_is_dir);
             }
-            // Если оба элемента - директории или оба - файлы, сортируем по алфавиту.
+            
             return a.path().filename() < b.path().filename();
         });
     
@@ -182,8 +179,7 @@ void TreeCLI::tree_recursive(const fs::path& directory_path, const std::string& 
 
         std::cout << TreeCLI::COLOR_RESET << std::endl;
 
-        // Рекурсивно обходим директории, но не переходим по символическим ссылкам,
-        // чтобы избежать бесконечных циклов (например, link -> ..).
+        
         if (entry.is_directory() && !entry.is_symlink()) {
             std::string next_prefix = prefix + (is_last ? "    " : this->br_); 
             tree_recursive(entry.path(), next_prefix, current_depth + 1);
