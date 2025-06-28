@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/d1sxrder3d/Dendron/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/d1sxrder3d/Dendron" alt="License">
+    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
   </a>
   <img src="https://img.shields.io/badge/language-C%2B%2B17-blue.svg" alt="Language C++17">
   <img src="https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg" alt="Platforms">
@@ -11,6 +11,8 @@
 <p align="center">
   <a href="dosc/README_ru.md">Read this in Russian (Русская версия)</a>
 </p>
+
+
 
 **Dendron** is a blazingly fast, cross-platform, and simple command-line utility to display directory structures in a tree-like format. An alternative to the classic `tree` utility, written in modern C++17.
 
