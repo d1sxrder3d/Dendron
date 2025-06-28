@@ -86,6 +86,7 @@ dendron [path] [options]
 | `-s <0-2>`     | `--style <0-2>`       | Display style. |
 | `-i <pattern>` | `--ignore <pattern>`  | Ignoring files/directories by pattern. |
 | `-f`           | `--files`             | Disable display of files in the tree. |
+| `-v`           | `--version`           | Show the version of Dendron.                                             |
 | `-h`           | `--help`              | Show the help message.                                                   |
 
 ### Examples

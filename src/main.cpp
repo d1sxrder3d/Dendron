@@ -8,6 +8,8 @@
 
 namespace fs = std::filesystem;
 
+std::string DENDRON_VERSION = "1.0.0";
+
 std::string trim(const std::string& str) {
     const std::string whitespace = " \t";
     const auto strBegin = str.find_first_not_of(whitespace);
@@ -176,6 +178,8 @@ ProgramOptions set_options(int argc, char* argv[]) {
         } else if (arg == "-h" || arg == "--help") {
             options.need_help = true;
             break; 
+        } else if (arg == "-v" || arg == "--version") {
+            std::cout << "Dendron version: " << DENDRON_VERSION << std::endl;
         } else {
             
             // Если аргумент не является флагом, считаем его путем.
@@ -208,6 +212,7 @@ int main(int argc, char* argv[]) {
                   << "  -t, --tree                 Sort directories before files\n"
                   << "  -f, --files                Ignore files in output\n"
                   << "  -i, --ignore <pattern...>  Ignore files/directories using the pattern\n"
+                  << "  -v, --version              Show version\n"
                   << "  -h, --help                 Show this message\n";
         return 0;
     }
