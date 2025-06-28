@@ -1,12 +1,14 @@
 #pragma once 
 
 #include <filesystem>
+#include <vector>
 #include <string>
+
 
 
 class TreeCLI{
 public:
-    explicit TreeCLI(int max_recursion_depth = -1, int char_style = 0, bool tree_style = false);
+    explicit TreeCLI(int max_recursion_depth, int char_style, bool tree_style, bool ignore_files, const std::vector<std::string>& ignore_patterns);
 
     /*
       @brief Отображает дерево директорий для указанного пути.
@@ -16,12 +18,70 @@ public:
 
 
 private:
-    void print_tree_recursive(const std::filesystem::path& directory_path, const std::string& prefix, int current_depth);
-    // Глубина рекурсии 
-    // "-1" - отключено
-    int max_recursion_depth_; 
-    int char_style_; // Стиль дерева (в разработке)
+    template<typename Range>
+    static bool check_pattern(const Range& patterns, const std::string& filename);
+
+    bool should_ignore(const std::string& filename) const;
+    const char* get_entry_color(const std::filesystem::directory_entry& entry) const;
+
+
+    void tree_recursive(const std::filesystem::path& directory_path, const std::string& prefix, int current_depth);
+
+
+    void print_object(const std::filesystem::directory_entry& entry);
+
+
+    const int char_style_; // Стиль псевдографики
+    
+    //Массив стилей псевдографики
+    static constexpr const char* const CHARS[12] = {
+        "╠", "╚", "║", "═", // Style 0
+        "┣", "┗", "┃", "━", // Style 1
+        "├", "└", "│", "─"  // Style 2
+    };
+    //Массив паттернов расширений изображений
+    static constexpr const char* const IMAGE_PATTERNS[] = {
+        "*.jpg", "*.png", "*.gif", 
+        "*.bmp","*.webp", "*.jpeg", 
+        "*.raw", "*.svg", "*.ico", 
+        "*.tiff"
+    };
+    //Массив паттернов расширений архивов
+    static constexpr const char* const ARCHIVE_PATTERNS[] = {
+        "*.zip", "*.rar", "*.7z", 
+        "*.tar", "*.gz", "*.bz2", 
+        "*.xz", "*.tar.gz", "*.tar.bz2", 
+        "*.tar.xz"
+    };
+
+
+    // Цвета ANSI
+    static constexpr const char* const COLOR_RESET = "\033[0m";
+    static constexpr const char* const COLOR_REGULAR_FILE = "\033[37m"; // Белый
+    static constexpr const char* const COLOR_IMAGE = "\033[33m";  // Желтый
+    static constexpr const char* const COLOR_EXEC = "\033[32m"; // Зеленый
+    static constexpr const char* const COLOR_DIR = "\033[34m";  // Синий
+    static constexpr const char* const COLOR_SYMLINK = "\033[36m"; // Голубой
+    static constexpr const char* const COLOR_ARCHIVE = "\033[35m"; // Фиолетовый
+
+    
+
+    // ╠═ or ┣━ or ├─
+    const std::string br_to_obj_;
+    
+    // ╚═ or ┗━ or └─
+    const std::string br_to_end_obj_;
+    
+    // ║ or ┃ or │ 
+    const std::string br_;
+
+    // Recursion depth
+    // "-1" - disabled
+    const int max_recursion_depth_; 
     // 0 (default) - файлы ниже 
     // 1 - файлы выше
-    bool tree_style_; 
+    const bool tree_style_; 
+    const bool ignore_files_;
+    const std::vector<std::string> ignore_patterns_;
+
 };
