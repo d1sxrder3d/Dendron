@@ -14,12 +14,12 @@
 
 
 
-**Dendron** is a blazingly fast, cross-platform, and simple command-line utility to display directory structures in a tree-like format. An alternative to the classic `tree` utility, written in modern C++17.
+**Dendron** is a blazingly fast, cross-platform, and simple command-line utility to display directory structures in a tree-like format. Written in modern C++17.
 
 ### Demo
 
 ```sh
-$ dendron . -r 1
+$ dendron . -r 1 -s 0
 .
 ╠═ .vscode
 ╠═ configs
@@ -36,13 +36,14 @@ $ dendron . -r 1
 ### Current
 - Display nested structure of files and directories.
 - Control recursion depth.
+- Different display styles (for example, files can be shown before directories).
+- Different color schemes for files and directories.
+- Pattern filtering.
 - Sort files before directories.
 - Cross-platform (Linux, macOS, Windows) thanks to C++17 `<filesystem>`.
 
+
 ### Planned
-- 🎨 **Colorized output**: Different colors for files and directories.
-- 🔍 **Pattern filtering**: Display only files matching a certain pattern (e.g., `*.cpp`).
-- 🚫 **Ignore paths**: Ability to ignore specific files or directories (like `.gitignore`).
 - ℹ️ **File details**: Option to show file sizes and permissions.
 - 📤 **Alternative output formats**: Export the tree structure to JSON or XML.
 
@@ -82,6 +83,9 @@ dendron [path] [options]
 | `-d <path>`    | `--directory <path>`  | Specify the directory to display. Defaults to the current directory.     |
 | `-r <depth>`   | `--recursion <depth>` | Set the maximum recursion depth.                                         |
 | `-t`           | `--tree`              | Sort files before directories.                                           |
+| `-s <0-2>`     | `--style <0-2>`       | Display style. |
+| `-i <pattern>` | `--ignore <pattern>`  | Ignoring files/directories by pattern. |
+| `-f`           | `--files`             | Disable display of files in the tree. |
 | `-h`           | `--help`              | Show the help message.                                                   |
 
 ### Examples
