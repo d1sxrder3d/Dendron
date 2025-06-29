@@ -3,7 +3,6 @@
 Detailed information about config settings
 
 ## Customization
----
 
 
 #### Branch display styles
@@ -36,7 +35,7 @@ Detailed information about config settings
 
 
 ## Settings
----
+
 
 
 #### Recursion depth

@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 <p align="center">
-  <a href="docs/ru/СHANGELOG_ru.md">Read this in Russian (Русская версия)</a>
+  <a href="docs/ru/CHANGELOG_ru.md">Read this in Russian (Русская версия)</a>
 </p>
 
 ---
