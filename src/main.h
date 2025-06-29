@@ -7,7 +7,7 @@
 
 
 struct ProgramOptions {
-    std::string directory_path = ""; 
+    std::filesystem::path directory_path = "./"; 
     std::vector<std::string> ignore_patterns;
     int max_recursion_depth = 1; // Default value: 1, safe mod
     int char_style = 2;           // Default value: ╠═, ╚═, ║

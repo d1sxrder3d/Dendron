@@ -8,14 +8,17 @@
 namespace fs = std::filesystem;
 
 
-TreeCLI::TreeCLI(int max_recursion_depth, int char_style, bool tree_style, bool ignore_files, const std::vector<std::string>& ignore_patterns)
-    : char_style_(char_style),
+TreeCLI::TreeCLI(int max_recursion_depth, int char_style, bool tree_style, bool ignore_files, const fs::path& absolute_current_path, const std::vector<std::string>& ignore_patterns)
+    : max_recursion_depth_(max_recursion_depth),
+      char_style_(char_style),
+      tree_style_(tree_style),
+      ignore_files_(ignore_files),
+      absolute_current_path_(absolute_current_path),
+      ignore_patterns_(ignore_patterns),
+      absolute_current_path_str_(absolute_current_path.string()),
       br_to_obj_(std::string(TreeCLI::CHARS[0 + char_style * 4]) + TreeCLI::CHARS[3 + char_style * 4]),
       br_to_end_obj_(std::string(TreeCLI::CHARS[1 + char_style * 4]) + TreeCLI::CHARS[3 + char_style * 4]),
-      br_(std::string(TreeCLI::CHARS[2 + char_style * 4]) + "   "),
-      max_recursion_depth_(max_recursion_depth),
-      tree_style_(tree_style), ignore_files_(ignore_files),
-      ignore_patterns_(ignore_patterns) {}
+      br_(std::string(TreeCLI::CHARS[2 + char_style * 4]) + "   ") {}
     
 
 
@@ -23,7 +26,7 @@ void TreeCLI::display(const fs::path& directory_path) {
     if (fs::exists(directory_path)) {
         std::cout << directory_path.string() << std::endl;
         
-        tree_recursive(directory_path, "", 0);
+        tree_recursive(this->absolute_current_path_, "", 0);
     } else {
         std::cerr << "Error: Path does not exist: " << directory_path.string() << std::endl;
     }
@@ -124,7 +127,7 @@ void TreeCLI::print_object(const fs::directory_entry& entry) {
     std::cout << TreeCLI::COLOR_RESET << std::endl;
 }
 
-void TreeCLI::tree_recursive(const fs::path& directory_path, const std::string& prefix, int current_depth) {
+void TreeCLI::tree_recursive(const std::filesystem::path&directory_path, const std::string& prefix, int current_depth) {
     
     if (max_recursion_depth_ != -1 && current_depth >= max_recursion_depth_) {
         return;
@@ -164,13 +167,29 @@ void TreeCLI::tree_recursive(const fs::path& directory_path, const std::string& 
         
         const char* color = get_entry_color(entry);
         
-        std::cout << prefix 
+        // \e]8;;//file://path\aname\e]8;;\a
+        if(!entry.is_directory() and !((entry.status().permissions() & 
+            (fs::perms::owner_exec 
+                | fs::perms::group_exec 
+                | fs::perms::others_exec)) != fs::perms::none)){
+            std::cout << prefix 
+                  << (is_last ? this->br_to_end_obj_ : this->br_to_obj_) << " " << color
+                  << "\e]8;;file://" << entry.path().string() 
+                  << "\a" << entry.path().filename().string() << "\e]8;;\a";
+        }else{
+            std::cout << prefix 
                   << (is_last ? this->br_to_end_obj_ : this->br_to_obj_) 
                   << " " << color << entry.path().filename().string();
+        }
+
+
 
         if (entry.is_symlink()) {
             try {
                 fs::path symlink_target = fs::read_symlink(entry.path());
+                // std::cout << " -> " << "\e]8;;file://" << fs::canonical(symlink_target).string() 
+                //           << "\a" << symlink_target.filename().string() << "\e]8;;\a";
+            
                 std::cout << " -> " << symlink_target.string();
             } catch (const fs::filesystem_error&) {
                 std::cout << " -> [broken link]";

@@ -221,8 +221,11 @@ int main(int argc, char* argv[]) {
     if (options.directory_path.empty()) {
         options.directory_path = fs::current_path();
     }
+
+    const fs::path absolute_current_path = fs::canonical(options.directory_path);
     
-    TreeCLI my_tree(options.max_recursion_depth, options.char_style, options.tree_style, options.ignore_files, options.ignore_patterns);
+    
+    TreeCLI my_tree(options.max_recursion_depth, options.char_style, options.tree_style, options.ignore_files, absolute_current_path, options.ignore_patterns);
     my_tree.display(options.directory_path);
 
     

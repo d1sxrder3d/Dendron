@@ -8,7 +8,7 @@
 
 class TreeCLI{
 public:
-    explicit TreeCLI(int max_recursion_depth, int char_style, bool tree_style, bool ignore_files, const std::vector<std::string>& ignore_patterns);
+    explicit TreeCLI(int max_recursion_depth, int char_style, bool tree_style, bool ignore_files, const std::filesystem::path& absolute_current_path, const std::vector<std::string>& ignore_patterns);
 
     /*
       @brief Отображает дерево директорий для указанного пути.
@@ -30,9 +30,6 @@ private:
 
     void print_object(const std::filesystem::directory_entry& entry);
 
-
-    const int char_style_; // Стиль псевдографики
-    
     //Массив стилей псевдографики
     static constexpr const char* const CHARS[12] = {
         "╠", "╚", "║", "═", // Style 0
@@ -63,25 +60,23 @@ private:
     static constexpr const char* const COLOR_DIR = "\033[34m";  // Синий
     static constexpr const char* const COLOR_SYMLINK = "\033[36m"; // Голубой
     static constexpr const char* const COLOR_ARCHIVE = "\033[35m"; // Фиолетовый
-
     
+    // --- Member Variables ---
 
-    // ╠═ or ┣━ or ├─
-    const std::string br_to_obj_;
-    
-    // ╚═ or ┗━ or └─
-    const std::string br_to_end_obj_;
-    
-    // ║ or ┃ or │ 
-    const std::string br_;
-
-    // Recursion depth
-    // "-1" - disabled
-    const int max_recursion_depth_; 
-    // 0 (default) - файлы ниже 
-    // 1 - файлы выше
-    const bool tree_style_; 
+    // Options from CLI/config
+    const int max_recursion_depth_; // Recursion depth, "-1" - disabled
+    const int char_style_;          // Стиль псевдографики
+    const bool tree_style_;         // false (default): directories first
     const bool ignore_files_;
+    const std::filesystem::path& absolute_current_path_;
     const std::vector<std::string> ignore_patterns_;
 
+    // Derived/internal state
+    const std::string absolute_current_path_str_;
+    // ╠═ or ┣━ or ├─
+    const std::string br_to_obj_;
+    // ╚═ or ┗━ or └─
+    const std::string br_to_end_obj_;
+    // ║ or ┃ or │
+    const std::string br_;
 };
