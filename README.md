@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/d1sxrder3d/Dendron/blob/main/docs/README_ru.md">Read this in Russian (Русская версия)</a>
+  <a href="docs/ru/README_ru.md">Read this in Russian (Русская версия)</a>
 </p>
 
 
@@ -46,6 +46,9 @@ $ dendron . -r 1 -s 0
 ### Planned
 - ℹ️ **File details**: Option to show file sizes and permissions.
 - 📤 **Alternative output formats**: Export the tree structure to JSON or XML.
+- 👀 **Interactive viewing mode**: clickable files and directories.
+- 💻 **Windows and masOS support** 
+- ⚒︎ **Icon support** 
 
 ## 🚀 Getting Started
 
@@ -53,7 +56,7 @@ $ dendron . -r 1 -s 0
 - A C++ compiler with C++17 support (e.g., GCC 9+, Clang 9+, MSVC 2019+).
 - `make` build system (optional, for convenience).
 
-### Installation (Linux/macOS)
+### Installation (Linux)
 
 1.  Clone the repository:
     ```sh
@@ -77,6 +80,7 @@ g++ -std=c++17 -Wall -Wextra -g src/main.cpp src/tree.cpp -o dendron
 ```
 dendron [path] [options]
 ```
+<h id="section_flags"></h>
 
 | Option         | Long Option           | Description                                                              |
 |----------------|-----------------------|--------------------------------------------------------------------------|
@@ -86,7 +90,6 @@ dendron [path] [options]
 | `-s <0-2>`     | `--style <0-2>`       | Display style. |
 | `-i <pattern>` | `--ignore <pattern>`  | Ignoring files/directories by pattern. |
 | `-f`           | `--files`             | Disable display of files in the tree. |
-| `-v`           | `--version`           | Show the version of Dendron.                                             |
 | `-h`           | `--help`              | Show the help message.                                                   |
 
 ### Examples
