@@ -18,6 +18,8 @@ struct ProgramOptions {
     bool need_config = false;     // Default value: no config needed
     bool show_hyperlinks = true;  // Default value: show hl
     bool ignore_files = false;    // Default value: don't ignore files
+    bool show_details = false;    // Default value: don't show details
+    std::string details_format = "PST";
     std::map<std::string, std::string> icons;
     
 };

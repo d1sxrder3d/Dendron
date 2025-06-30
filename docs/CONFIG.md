@@ -94,3 +94,25 @@ You can add any extensions you need.
 
 - true - clickables
 - false - not clickables
+
+#### Show details by default
+#### `show_details = true/false`
+
+- `true` - show details.
+- `false` - do not show details.
+
+
+#### Details output format
+#### `details_format = <format>`
+**Defines which file details to display and in what order.**
+(Default: `P, S, T`)
+
+- `P` - permissions.
+- `S` - size.
+- `T` - last modification time.
+- `L` - number of hard links (Unix-like).
+- `U` - user/owner (Unix-like).
+- `G` - group (Unix-like).
+
+You can combine these characters in any order, e.g., `T, S, P` or `S, T`. Separators (spaces, commas) are ignored.
+Example for a full output: `details_format = P,L,U,G,S,T`

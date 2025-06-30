@@ -6,10 +6,12 @@
 #include <chrono>
 #include "./tree.h"
 #include "./main.h" 
+#include <algorithm>
+
 
 namespace fs = std::filesystem;
 
-std::string DENDRON_VERSION = "1.0.0";
+std::string DENDRON_VERSION = "1.1.0";
 
 std::string trim(const std::string& str) {
     const std::string whitespace = " \t";
@@ -85,8 +87,10 @@ void set_config(ProgramOptions& options){
                     options.ignore_patterns.push_back(trimmed_pattern);
                 }
             }
+
         } else if(key == "default_directory"){
             options.directory_path = value;
+
         } else if(key == "max_recursion_depth"){
             try{
                 int depth = std::stoi(value);
@@ -98,6 +102,7 @@ void set_config(ProgramOptions& options){
                 std::cerr << "Error: Invalid value of max_recursion_depth config. (safe mode, max_recursion_depth = 1)" << std::endl;
                 options.max_recursion_depth = 1;
             }
+
         } else if(key == "branches_style"){
             try{
                 int style = std::stoi(value);
@@ -111,19 +116,33 @@ void set_config(ProgramOptions& options){
                 std::cerr << "Error: Invalid value for config char_style. (safe mode, char_style = 2)" << std::endl;
                 options.char_style = 2;
             }
+
+        } else if (key == "show_details") {
+            options.show_details = (value == "true");
+        } else if (key == "details_format") {
+            value.erase(std::remove_if(value.begin(), value.end(), 
+                [](char c){ return std::isspace(static_cast<unsigned char>(c)) || c == ','; }), 
+                value.end());
+            options.details_format = value;
+
         } else if(key == "tree_style"){
             options.tree_style = (value == "true");
+
         } else if(key == "ignore_files"){
             options.ignore_files = (value == "true");
+
         } else if(key == "active_icons"){
             options.active_icons = (value == "true");
+
         } else if(key == "show_hyperlinks"){
             options.show_hyperlinks = (value == "true");
+
         } else if (key.rfind("icon_", 0) == 0) { 
             if (key.length() > 5) {
                 std::string icon_key = key.substr(5);
                 options.icons[icon_key] = value;
             }
+
         }
     }
 }
@@ -133,13 +152,8 @@ void set_flags(ProgramOptions& options, int argc, char* argv[]) {
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
 
-        if (arg == "-d" || arg == "--directory") {
-            if (i + 1 < argc) {
-                options.directory_path = argv[++i];
-            } else {
-                std::cerr << "Error: for argument " << arg << " value required." << std::endl;
-            }
-        } else if (arg == "-r" || arg == "--recursion") {
+        
+        if (arg == "-r" || arg == "--recursion") {
             if (i + 1 < argc) {
                 try {
                     i++; 
@@ -171,27 +185,38 @@ void set_flags(ProgramOptions& options, int argc, char* argv[]) {
                     options.char_style = 2;
                 }
             }
+        } else if (arg == "-d" || arg == "--details"){
+            options.show_details = true;
+
         } else if (arg == "--icons") {
             options.active_icons = false;
+
         } else if (arg == "-t" || arg == "--tree") {
             options.tree_style = true;
+
         } else if (arg == "-f" || arg == "--files") { 
             options.ignore_files = true;
+
         } else if (arg == "-i" || arg == "--ignore") {
             while (i + 1 < argc && argv[i + 1][0] != '-') {
                 i++;
                 options.ignore_patterns.push_back(argv[i]);
             }
+
         } else if(arg == "--config"){
             options.need_config = true;
             break;
+
         } else if (arg == "-h" || arg == "--help") {
             options.need_help = true;
             break; 
+
         } else if (arg == "-v" || arg == "--version") {
             std::cout << "Dendron version: " << DENDRON_VERSION << std::endl;
+
         } else if (arg == "--iconsoff") {
             options.active_icons = false;
+
         } else {
             
             
@@ -201,6 +226,7 @@ void set_flags(ProgramOptions& options, int argc, char* argv[]) {
                 std::cerr << "Unknown argument or invalid path: " << arg << std::endl;
                 options.need_help = true;
             }
+
         }
     }
 }
@@ -231,14 +257,14 @@ int main(int argc, char* argv[]) {
     if (options.need_help) {
         std::cout << "Usage: ./tree_cli [path] [options]\n"
                   << "Options:\n"
-                  << "  -d, --directory <path>     Specify the path to the directory\n"
                   << "  -r, --recursion <number>   Set maximum recursion depth\n"
+                  << "  -d, --details              Show details of files and directories (permissions, size, etc.)\n"
                   << "  -s, --style <0-2>          Set tree style\n"
-                  << "  -t, --tree                 Sort directories before files\n"
+                  << "  -t, --tree                 Sort files before directories\n"
                   << "  -f, --files                Ignore files in output\n"
                   << "  -i, --ignore <pattern...>  Ignore files/directories using the pattern\n"
                   << "  -v, --version              Show version\n"
-                  << "  --iconsoff <true/false>       Disable icons\n"
+                  << "  --iconsoff <true/false>    Disable icons\n"
                   << "  --config                   Open configuration file\n"
                   << "  -h, --help                 Show this message\n";
         return 0;
@@ -270,11 +296,11 @@ int main(int argc, char* argv[]) {
         icons_by_extension = options.icons;
     }
     
-    TreeCLI my_tree(options.max_recursion_depth, options.char_style, 
+    TreeCLI my_tree(options.max_recursion_depth, options.show_details, options.char_style, 
         options.tree_style, options.ignore_files, options.show_hyperlinks,
-        absolute_current_path, options.ignore_patterns,
+        absolute_current_path, options.ignore_patterns, options.details_format,
         icons_by_extension, file_icon, dir_icon);
-    my_tree.display(options.directory_path);
+    my_tree.display();
 
     // auto end = std::chrono::high_resolution_clock::now();
     // auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);

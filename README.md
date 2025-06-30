@@ -56,14 +56,13 @@ $ dendron . -r 1
 - 🖱️ **Clickable file links** in supported terminals.
 - ✨ **Icon support** for files and directories (requires a Nerd Font).
 - 🔍 **Pattern filtering** to exclude unwanted entries.
+- ℹ️ **File details**: Option to show file sizes and permissions.
 - ↕️ **Flexible sorting** (files before or after directories).
 - ⚙️ **Performance** High performance thanks to C++17
 
 ### Planned
-- ℹ️ **File details**: Option to show file sizes and permissions.
 - 📤 **Alternative output formats**: Export the tree structure to JSON or XML.
-- 💻 **Windows and masOS support** 
-- ⚒︎ **Icon support** 
+- 💻 **Windows and masOS support**
 
 ## 🚀 Getting Started
 
@@ -100,8 +99,8 @@ dendron [path] [options]
 
 | Option         | Long Option           | Description                                                              |
 |----------------|-----------------------|--------------------------------------------------------------------------|
-| `-d <path>`    | `--directory <path>`  | Specify the directory to display. Defaults to the current directory.     |
 | `-r <depth>`   | `--recursion <depth>` | Set the maximum recursion depth.                                         |
+| `-d`    | `--details`  | Show details of files and directories.     |
 | `-t`           | `--tree`              | Sort files before directories.                                           |
 | `-s <0-2>`     | `--style <0-2>`       | Display style. |
 | `-i <pattern>` | `--ignore <pattern>`  | Ignoring files/directories by pattern. |

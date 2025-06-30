@@ -9,17 +9,17 @@
 
 class TreeCLI{
 public:
-    explicit TreeCLI(short int max_recursion_depth, short int char_style, 
+    explicit TreeCLI(short int max_recursion_depth, bool show_details, short int char_style, 
         bool tree_style, bool ignore_files, bool show_hyperlinks ,
         const std::filesystem::path& absolute_current_path, const std::vector<std::string>& ignore_patterns, 
-        const std::map<std::string, std::string>& icons_by_extension, 
+        const std::string& details_format, const std::map<std::string, std::string>& icons_by_extension, 
         const std::string& default_file_icon, const std::string& directory_icon);
 
     /*
       @brief Отображает дерево директорий для указанного пути.
       @param directory_path Путь к директории для отображения.
      */
-    void display(const std::filesystem::path& directory_path);
+    void display();
 
 
 private:
@@ -27,11 +27,21 @@ private:
     static bool check_pattern(const Range& patterns, std::string_view filename);
 
     bool should_ignore(std::string_view filename) const;
-    const char* get_entry_color(const std::filesystem::directory_entry& entry) const;
+    const char* get_entry_color(const std::filesystem::directory_entry& entry, std::filesystem::file_status status) const;
 
     std::string get_icon(const std::filesystem::directory_entry& entry) const;
 
-    void tree_recursive(const std::filesystem::path& directory_path, std::string& prefix, int current_depth);
+    void tree_recursive(const std::filesystem::path& path, std::string& prefix, int current_depth);
+
+
+    static std::string format_permissions(std::filesystem::perms p, bool is_dir, bool is_symlink);
+    static std::string format_size(uintmax_t size);
+    static std::string format_time(std::filesystem::file_time_type ftime);
+#if defined(__unix__) || defined(__APPLE__)
+    static std::string format_owner(uid_t uid);
+    static std::string format_group(gid_t gid);
+#endif
+
 
 
 
@@ -70,12 +80,14 @@ private:
 
     // Options from CLI/config
     const short int max_recursion_depth_; 
+    const bool show_details_;
     const short int char_style_;          // Стиль псевдографики
     const bool tree_style_;         
     const bool ignore_files_;
     const bool show_hyperlinks_;
     const std::filesystem::path& absolute_current_path_;
     const std::vector<std::string> ignore_patterns_;
+    const std::string details_format_;
 
     // Derived/internal state
     const std::string absolute_current_path_str_;

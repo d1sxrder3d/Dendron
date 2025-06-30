@@ -7,6 +7,14 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.1.0] - 2025-07-01
+### Added
+- **Icon support**: Display icons for files and directories (requires a Nerd Font).
+- **Clickable file links**: In supported terminals, file names become clickable.
+- **File details**: Option to show file sizes and permissions with the `-d` flag. 
+- **Flexible details format**: In `config.ini`, the option ["details_format"](docs/CONFIG.md#details_format) to customize the order and set of displayed details.
+- **Performance Optimization**: Reduced the number of system calls to improve performance in verbose mode.
+
 
 ## [1.0.0] - 2025-06-29
 ### Added
