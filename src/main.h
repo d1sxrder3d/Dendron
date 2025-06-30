@@ -13,6 +13,8 @@ struct ProgramOptions {
     int char_style = 2;           // Default value: ╠═, ╚═, ║
     bool tree_style = false;      // Default value: directories first
     bool need_help = false;       // Default value: no help needed
+    bool need_config = false;     // Default value: no config needed
+    bool show_hyperlinks = true;  // Default value: show hl
     bool ignore_files = false;    // Default value: don't ignore files
  
 };

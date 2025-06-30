@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
+#include <cstdlib>
 #include "./tree.h"
 #include "./main.h" 
 
@@ -47,12 +48,12 @@ std::string get_config_path() {
     if (!config_path.empty() && fs::exists(config_path)) {
         return config_path.string();
     }
-    // Запасной вариант для разработки или переносимого режима
+    // Запасной вариант для разработки 
     return (fs::current_path() / "configs" / "config.ini").string();
 }
 
 //
-void parse_config(ProgramOptions& options){
+void set_config(ProgramOptions& options){
     std::ifstream config_file(get_config_path());
     if(!config_file.is_open()) {
         
@@ -113,15 +114,15 @@ void parse_config(ProgramOptions& options){
             options.tree_style = (value == "true");
         } else if(key == "ignore_files"){
             options.ignore_files = (value == "true");
+        } else if(key == "show_hyperlinks"){
+            options.show_hyperlinks = (value == "true");
         }
     }
 }
 
-ProgramOptions set_options(int argc, char* argv[]) {
+void set_flags(ProgramOptions& options, int argc, char* argv[]) {
 
-    ProgramOptions options; 
     
-    parse_config(options);
 
     
 
@@ -175,6 +176,9 @@ ProgramOptions set_options(int argc, char* argv[]) {
                 i++;
                 options.ignore_patterns.push_back(argv[i]);
             }
+        }else if(arg == "--config"){
+            options.need_config = true;
+            break;
         } else if (arg == "-h" || arg == "--help") {
             options.need_help = true;
             break; 
@@ -192,17 +196,29 @@ ProgramOptions set_options(int argc, char* argv[]) {
             }
         }
     }
-
-    return options;
 }
+
 
 
 
 
 int main(int argc, char* argv[]) {
 
-    ProgramOptions options = set_options(argc, argv);
+    ProgramOptions options;
+
+    set_config(options);
+
+    set_flags(options, argc, argv);
     
+    if(options.need_config){
+
+#if defined(_WIN32)
+#elif defined(__APPLE__)
+#else
+    std::system("nano ~/.config/dendron/config.ini");
+#endif
+        return 0;
+    }
     if (options.need_help) {
         std::cout << "Usage: ./tree_cli [path] [options]\n"
                   << "Options:\n"
@@ -213,6 +229,7 @@ int main(int argc, char* argv[]) {
                   << "  -f, --files                Ignore files in output\n"
                   << "  -i, --ignore <pattern...>  Ignore files/directories using the pattern\n"
                   << "  -v, --version              Show version\n"
+                  << "  --config                   Open configuration file\n"
                   << "  -h, --help                 Show this message\n";
         return 0;
     }
@@ -225,7 +242,9 @@ int main(int argc, char* argv[]) {
     const fs::path absolute_current_path = fs::canonical(options.directory_path);
     
     
-    TreeCLI my_tree(options.max_recursion_depth, options.char_style, options.tree_style, options.ignore_files, absolute_current_path, options.ignore_patterns);
+    TreeCLI my_tree(options.max_recursion_depth, options.char_style, 
+        options.tree_style, options.ignore_files, options.show_hyperlinks,
+        absolute_current_path, options.ignore_patterns);
     my_tree.display(options.directory_path);
 
     

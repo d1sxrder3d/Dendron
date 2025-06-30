@@ -8,11 +8,12 @@
 namespace fs = std::filesystem;
 
 
-TreeCLI::TreeCLI(int max_recursion_depth, int char_style, bool tree_style, bool ignore_files, const fs::path& absolute_current_path, const std::vector<std::string>& ignore_patterns)
+TreeCLI::TreeCLI(int max_recursion_depth, int char_style, bool tree_style, bool ignore_files, bool show_hyperlinks, const fs::path& absolute_current_path, const std::vector<std::string>& ignore_patterns)
     : max_recursion_depth_(max_recursion_depth),
       char_style_(char_style),
       tree_style_(tree_style),
       ignore_files_(ignore_files),
+      show_hyperlinks_(show_hyperlinks),
       absolute_current_path_(absolute_current_path),
       ignore_patterns_(ignore_patterns),
       absolute_current_path_str_(absolute_current_path.string()),

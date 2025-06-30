@@ -60,3 +60,9 @@ Detailed information about config settings
 
 **Sets the default value for building the tree if the directory is not specified.**
 
+# Whether to output files as hyperlinks
+**Are files clickable?**
+#### `hyper_links = true/false`
+
+- true - clickables
+- false - not clickables

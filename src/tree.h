@@ -8,7 +8,7 @@
 
 class TreeCLI{
 public:
-    explicit TreeCLI(int max_recursion_depth, int char_style, bool tree_style, bool ignore_files, const std::filesystem::path& absolute_current_path, const std::vector<std::string>& ignore_patterns);
+    explicit TreeCLI(int max_recursion_depth, int char_style, bool tree_style, bool ignore_files, bool show_hyperlinks ,const std::filesystem::path& absolute_current_path, const std::vector<std::string>& ignore_patterns);
 
     /*
       @brief Отображает дерево директорий для указанного пути.
@@ -64,10 +64,11 @@ private:
     // --- Member Variables ---
 
     // Options from CLI/config
-    const int max_recursion_depth_; // Recursion depth, "-1" - disabled
+    const int max_recursion_depth_; 
     const int char_style_;          // Стиль псевдографики
-    const bool tree_style_;         // false (default): directories first
+    const bool tree_style_;         
     const bool ignore_files_;
+    const bool show_hyperlinks_;
     const std::filesystem::path& absolute_current_path_;
     const std::vector<std::string> ignore_patterns_;
 

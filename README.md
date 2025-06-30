@@ -90,6 +90,7 @@ dendron [path] [options]
 | `-s <0-2>`     | `--style <0-2>`       | Display style. |
 | `-i <pattern>` | `--ignore <pattern>`  | Ignoring files/directories by pattern. |
 | `-f`           | `--files`             | Disable display of files in the tree. |
+|| `--config`            | Open configuration file             |
 | `-h`           | `--help`              | Show the help message.                                                   |
 
 ### Examples
