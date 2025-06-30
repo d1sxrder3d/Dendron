@@ -8,7 +8,7 @@
 
 class TreeCLI{
 public:
-    explicit TreeCLI(int max_recursion_depth, int char_style, bool tree_style, bool ignore_files, bool show_hyperlinks ,const std::filesystem::path& absolute_current_path, const std::vector<std::string>& ignore_patterns);
+    explicit TreeCLI(short int max_recursion_depth, short int char_style, bool tree_style, bool ignore_files, bool show_hyperlinks ,const std::filesystem::path& absolute_current_path, const std::vector<std::string>& ignore_patterns);
 
     /*
       @brief Отображает дерево директорий для указанного пути.
@@ -19,16 +19,13 @@ public:
 
 private:
     template<typename Range>
-    static bool check_pattern(const Range& patterns, const std::string& filename);
+    static bool check_pattern(const Range& patterns, std::string_view filename);
 
-    bool should_ignore(const std::string& filename) const;
+    bool should_ignore(std::string_view filename) const;
     const char* get_entry_color(const std::filesystem::directory_entry& entry) const;
 
 
-    void tree_recursive(const std::filesystem::path& directory_path, const std::string& prefix, int current_depth);
-
-
-    void print_object(const std::filesystem::directory_entry& entry);
+    void tree_recursive(const std::filesystem::path& directory_path, std::string& prefix, int current_depth);
 
     //Массив стилей псевдографики
     static constexpr const char* const CHARS[12] = {
@@ -64,8 +61,8 @@ private:
     // --- Member Variables ---
 
     // Options from CLI/config
-    const int max_recursion_depth_; 
-    const int char_style_;          // Стиль псевдографики
+    const short int max_recursion_depth_; 
+    const short int char_style_;          // Стиль псевдографики
     const bool tree_style_;         
     const bool ignore_files_;
     const bool show_hyperlinks_;

@@ -62,7 +62,7 @@ Detailed information about config settings
 
 # Whether to output files as hyperlinks
 **Are files clickable?**
-#### `hyper_links = true/false`
+#### `show_hyperlinks = true/false`
 
 - true - clickables
 - false - not clickables
