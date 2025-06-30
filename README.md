@@ -18,43 +18,58 @@
 
 ### Demo
 
+Without icons:
 ```sh
-$ dendron . -r 1 -s 0
+$ dendron . -r 1 --iconsoff
 .
-╠═ .vscode
-╠═ configs
-╠═ src
-╠═ .gitignore
-╠═ install.sh
-╠═ LICENSE
-╠═ Makefile
-╚═ README.md
+├── .vscode
+├── configs
+├── src
+├── .gitignore
+├── install.sh
+├── LICENSE
+├── Makefile
+└── README.md
+```
+
+With icons (requires a Nerd Font):
+```sh
+$ dendron . -r 1
+.
+├──  .vscode
+├──  configs
+├──  src
+├──  .gitignore
+├──  install.sh
+├──  LICENSE
+├──  Makefile
+└──  README.md
 ```
 
 ## ✨ Features
 
 ### Current
-- Display nested structure of files and directories.
-- Control recursion depth.
-- Different display styles (for example, files can be shown before directories).
-- Different color schemes for files and directories.
-- Pattern filtering.
-- Sort files before directories.
-- Cross-platform (Linux, macOS, Windows) thanks to C++17 `<filesystem>`.
-
+- 🌳 **Nested structure display** of files and directories.
+- 📏 **Recursion depth control** to manage output.
+- 🎨 **Multiple display styles** (e.g., files before directories).
+- 🌈 **Color schemes** for different file and directory types.
+- 🖱️ **Clickable file links** in supported terminals.
+- ✨ **Icon support** for files and directories (requires a Nerd Font).
+- 🔍 **Pattern filtering** to exclude unwanted entries.
+- ℹ️ **File details**: Option to show file sizes and permissions.
+- ↕️ **Flexible sorting** (files before or after directories).
+- ⚙️ **Performance** High performance thanks to C++17
 
 ### Planned
-- ℹ️ **File details**: Option to show file sizes and permissions.
 - 📤 **Alternative output formats**: Export the tree structure to JSON or XML.
-- 👀 **Interactive viewing mode**: clickable files and directories.
-- 💻 **Windows and masOS support** 
-- ⚒︎ **Icon support** 
+- 💻 **Windows and masOS support**
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 - A C++ compiler with C++17 support (e.g., GCC 9+, Clang 9+, MSVC 2019+).
 - `make` build system (optional, for convenience).
+- "Nerd fonts" for displaying icons (optional).
 
 ### Installation (Linux)
 
@@ -84,12 +99,14 @@ dendron [path] [options]
 
 | Option         | Long Option           | Description                                                              |
 |----------------|-----------------------|--------------------------------------------------------------------------|
-| `-d <path>`    | `--directory <path>`  | Specify the directory to display. Defaults to the current directory.     |
 | `-r <depth>`   | `--recursion <depth>` | Set the maximum recursion depth.                                         |
+| `-d`    | `--details`  | Show details of files and directories.     |
 | `-t`           | `--tree`              | Sort files before directories.                                           |
 | `-s <0-2>`     | `--style <0-2>`       | Display style. |
 | `-i <pattern>` | `--ignore <pattern>`  | Ignoring files/directories by pattern. |
 | `-f`           | `--files`             | Disable display of files in the tree. |
+|| `--config`            | Open configuration file             |
+|| `--iconsoff`          | Disable icon display             |
 | `-h`           | `--help`              | Show the help message.                                                   |
 
 ### Examples
@@ -114,4 +131,3 @@ To uninstall Dendron, navigate to the cloned repository directory and run the un
 
 ## 📜 License
 This project is licensed under the MIT License - see the LICENSE file for details.
-

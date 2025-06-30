@@ -2,6 +2,11 @@
 
 Detailed information about config settings
 
+<p align="center">
+  <a href="ru/CONFIG_ru.md">Read this in Russian (Русская версия)</a>
+</p>
+
+
 ## Customization
 
 
@@ -23,8 +28,8 @@ Detailed information about config settings
 **Sets the tree display style.**
 (Default: false)
 
-- true - files below directories
-- false - files above directories
+- `true` - files are sorted before directories.
+- `false` - directories are sorted before files.
 
 
 #### Ignore all files
@@ -32,6 +37,29 @@ Detailed information about config settings
 #### `ignore_files = true/false`
 - true - show only directories
 - false - show files and directories
+
+#### Icons
+
+To display icons correctly, you need to have a [Nerd Font](https://www.nerdfonts.com/) installed and selected in your terminal.
+
+#### `active_icons = true/false`
+
+**Enables or disables the display of icons.**
+(Default: true)
+
+- true - display icons
+- false - do not display icons
+
+#### `icon_* = <icon>`
+
+**Sets a specific icon for a file type or directory.**
+
+- `icon_dir` - icon for all directories.
+- `icon_file` - default icon for all files that do not have a specific icon.
+- `icon_<extension>` - icon for files with a specific extension. For example, `icon_cpp = ` sets the icon for all `.cpp` files.
+
+You can add any extensions you need.
+
 
 
 ## Settings
@@ -60,3 +88,31 @@ Detailed information about config settings
 
 **Sets the default value for building the tree if the directory is not specified.**
 
+# Whether to output files as hyperlinks
+**Are files clickable?**
+#### `show_hyperlinks = true/false`
+
+- true - clickables
+- false - not clickables
+
+#### Show details by default
+#### `show_details = true/false`
+
+- `true` - show details.
+- `false` - do not show details.
+
+
+#### Details output format
+#### `details_format = <format>`
+**Defines which file details to display and in what order.**
+(Default: `P, S, T`)
+
+- `P` - permissions.
+- `S` - size.
+- `T` - last modification time.
+- `L` - number of hard links (Unix-like).
+- `U` - user/owner (Unix-like).
+- `G` - group (Unix-like).
+
+You can combine these characters in any order, e.g., `T, S, P` or `S, T`. Separators (spaces, commas) are ignored.
+Example for a full output: `details_format = P,L,U,G,S,T`
