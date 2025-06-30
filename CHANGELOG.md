@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+
 ## [1.0.0] - 2025-06-29
 ### Added
 - Initial release of Dendron
@@ -15,4 +16,3 @@ All notable changes to this project will be documented in this file.
 - Flag support: [watch flags](README.md#section_flags)
 - installation and uninstallation via install.sh, uninstall.sh
 - Make build system support
-

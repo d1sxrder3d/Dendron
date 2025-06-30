@@ -2,13 +2,18 @@
 
 #include <filesystem>
 #include <vector>
+#include <map>
 #include <string>
 
 
 
 class TreeCLI{
 public:
-    explicit TreeCLI(short int max_recursion_depth, short int char_style, bool tree_style, bool ignore_files, bool show_hyperlinks ,const std::filesystem::path& absolute_current_path, const std::vector<std::string>& ignore_patterns);
+    explicit TreeCLI(short int max_recursion_depth, short int char_style, 
+        bool tree_style, bool ignore_files, bool show_hyperlinks ,
+        const std::filesystem::path& absolute_current_path, const std::vector<std::string>& ignore_patterns, 
+        const std::map<std::string, std::string>& icons_by_extension, 
+        const std::string& default_file_icon, const std::string& directory_icon);
 
     /*
       @brief Отображает дерево директорий для указанного пути.
@@ -24,8 +29,11 @@ private:
     bool should_ignore(std::string_view filename) const;
     const char* get_entry_color(const std::filesystem::directory_entry& entry) const;
 
+    std::string get_icon(const std::filesystem::directory_entry& entry) const;
 
     void tree_recursive(const std::filesystem::path& directory_path, std::string& prefix, int current_depth);
+
+
 
     //Массив стилей псевдографики
     static constexpr const char* const CHARS[12] = {
@@ -77,4 +85,8 @@ private:
     const std::string br_to_end_obj_;
     // ║ or ┃ or │
     const std::string br_;
+
+    const std::map<std::string, std::string> icons_by_extension_;
+    const std::string default_file_icon_;
+    const std::string directory_icon_ ;
 };

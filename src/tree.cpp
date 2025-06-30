@@ -2,13 +2,20 @@
 
 #include <iostream>
 #include <vector>
+#include <string>
+#include <map>
 #include <string_view>
 #include <algorithm>
 
 namespace fs = std::filesystem;
 
 
-TreeCLI::TreeCLI(short int max_recursion_depth, short int char_style, bool tree_style, bool ignore_files, bool show_hyperlinks, const fs::path& absolute_current_path, const std::vector<std::string>& ignore_patterns)
+
+TreeCLI::TreeCLI(short int max_recursion_depth, short int char_style, 
+    bool tree_style, bool ignore_files, 
+    bool show_hyperlinks, const fs::path& absolute_current_path, 
+    const std::vector<std::string>& ignore_patterns,
+    const std::map<std::string, std::string>& icons_by_extension, const std::string& default_file_icon, const std::string& directory_icon)
     : max_recursion_depth_(max_recursion_depth),
       char_style_(char_style),
       tree_style_(tree_style),
@@ -19,15 +26,17 @@ TreeCLI::TreeCLI(short int max_recursion_depth, short int char_style, bool tree_
       absolute_current_path_str_(absolute_current_path.string()),
       br_to_obj_(std::string(TreeCLI::CHARS[0 + char_style * 4]) + TreeCLI::CHARS[3 + char_style * 4]),
       br_to_end_obj_(std::string(TreeCLI::CHARS[1 + char_style * 4]) + TreeCLI::CHARS[3 + char_style * 4]),
-      br_(std::string(TreeCLI::CHARS[2 + char_style * 4]) + "   ") {}
-    
+      br_(std::string(TreeCLI::CHARS[2 + char_style * 4]) + "   "),
+      icons_by_extension_(icons_by_extension), 
+      default_file_icon_(default_file_icon),
+      directory_icon_(directory_icon) {}
 
 
 void TreeCLI::display(const fs::path& directory_path) {
     if (fs::exists(directory_path)) {
-        std::cout << directory_path.string() << std::endl; // Как вы и просили, отображаем пользовательский путь
-        std::string prefix; // Начинаем с пустого префикса
-        tree_recursive(this->absolute_current_path_, prefix, 0); // Но обход начинаем с канонического пути
+        std::cout << directory_path.string() << std::endl; 
+        std::string prefix; 
+        tree_recursive(this->absolute_current_path_, prefix, 0); 
     } else {
         std::cerr << "Error: Path does not exist: " << directory_path.string() << std::endl;
     }
@@ -96,7 +105,7 @@ const char* TreeCLI::get_entry_color(const fs::directory_entry& entry) const {
                 return COLOR_EXEC;
             }
             const auto filename_str = entry.path().filename().string();
-            // Если не исполняемый, проверяем, не картинка ли это
+           
             if (TreeCLI::check_pattern(TreeCLI::IMAGE_PATTERNS, filename_str)) {
                 return COLOR_IMAGE;
             } else if (TreeCLI::check_pattern(TreeCLI::ARCHIVE_PATTERNS, filename_str)){
@@ -109,6 +118,32 @@ const char* TreeCLI::get_entry_color(const fs::directory_entry& entry) const {
     return COLOR_REGULAR_FILE;
 }
 
+std::string TreeCLI::get_icon(const fs::directory_entry& entry) const {
+    if (entry.is_directory()) {
+        if(entry.path().filename().string() == ".git"){
+            auto it = icons_by_extension_.find("git");
+                if (it != icons_by_extension_.end()) {
+                    return it->second;
+            }
+        }
+        return directory_icon_; 
+    }
+
+    const auto& path = entry.path();
+    if (path.has_extension()) {
+        std::string ext = path.extension().string();
+        if (ext.length() > 1) { 
+
+            auto it = icons_by_extension_.find(ext.substr(1)); 
+            if (it != icons_by_extension_.end()) {
+                return it->second;
+            }
+        }
+    }
+
+    return default_file_icon_; 
+}
+
 
 void TreeCLI::tree_recursive(const std::filesystem::path& directory_path, std::string& prefix, int current_depth) {
     
@@ -119,7 +154,7 @@ void TreeCLI::tree_recursive(const std::filesystem::path& directory_path, std::s
     std::vector<fs::directory_entry> entries;
     try {
         for (const auto& entry : fs::directory_iterator(directory_path)) {
-            if (should_ignore(entry.path().filename().string())) { // Выделение памяти здесь, к сожалению, трудно избежать для кроссплатформенности
+            if (should_ignore(entry.path().filename().string())) { 
                 continue;
             }
             if (!ignore_files_ || entry.is_directory()) {
@@ -152,12 +187,18 @@ void TreeCLI::tree_recursive(const std::filesystem::path& directory_path, std::s
         line_ss << prefix << (is_last ? br_to_end_obj_ : br_to_obj_) << " ";
 
         const char* color = get_entry_color(entry);
+        line_ss << color;
+
+        const std::string icon = get_icon(entry);
+        if (!icon.empty()) {
+            line_ss << icon << " ";
+        }
 
         if (this->show_hyperlinks_ && !entry.is_directory() && !entry.is_symlink()) {
-            line_ss << color << "\e]8;;file://" << entry.path().string() 
+            line_ss << "\e]8;;file://" << entry.path().string() 
                       << "\a" << entry.path().filename().string() << "\e]8;;\a";
         } else {
-            line_ss << color << entry.path().filename().string();
+            line_ss << entry.path().filename().string();
         }
 
 
@@ -175,7 +216,7 @@ void TreeCLI::tree_recursive(const std::filesystem::path& directory_path, std::s
 
         
         if (entry.is_directory() && !entry.is_symlink()) {
-            // Модификация префикса "на месте": добавляем, рекурсируем, убираем
+            
             const std::string& branch = is_last ? "    " : br_;
             prefix.append(branch);
             tree_recursive(entry.path(), prefix, current_depth + 1);

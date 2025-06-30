@@ -3,9 +3,9 @@
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
+#include <chrono>
 #include "./tree.h"
 #include "./main.h" 
-
 
 namespace fs = std::filesystem;
 
@@ -15,7 +15,7 @@ std::string trim(const std::string& str) {
     const std::string whitespace = " \t";
     const auto strBegin = str.find_first_not_of(whitespace);
     if (strBegin == std::string::npos)
-        return ""; // пустая строка или строка из пробелов
+        return ""; 
 
     const auto strEnd = str.find_last_not_of(whitespace);
     const auto strRange = strEnd - strBegin + 1;
@@ -75,6 +75,7 @@ void set_config(ProgramOptions& options){
         std::string key = trim(line.substr(0, pos));
         std::string value = trim(line.substr(pos + 1));
         
+
         if(key == "ignore_patterns"){
             std::stringstream ss(value);
             std::string pattern;
@@ -114,8 +115,15 @@ void set_config(ProgramOptions& options){
             options.tree_style = (value == "true");
         } else if(key == "ignore_files"){
             options.ignore_files = (value == "true");
+        } else if(key == "active_icons"){
+            options.active_icons = (value == "true");
         } else if(key == "show_hyperlinks"){
             options.show_hyperlinks = (value == "true");
+        } else if (key.rfind("icon_", 0) == 0) { 
+            if (key.length() > 5) {
+                std::string icon_key = key.substr(5);
+                options.icons[icon_key] = value;
+            }
         }
     }
 }
@@ -163,6 +171,8 @@ void set_flags(ProgramOptions& options, int argc, char* argv[]) {
                     options.char_style = 2;
                 }
             }
+        } else if (arg == "--icons") {
+            options.active_icons = false;
         } else if (arg == "-t" || arg == "--tree") {
             options.tree_style = true;
         } else if (arg == "-f" || arg == "--files") { 
@@ -172,7 +182,7 @@ void set_flags(ProgramOptions& options, int argc, char* argv[]) {
                 i++;
                 options.ignore_patterns.push_back(argv[i]);
             }
-        }else if(arg == "--config"){
+        } else if(arg == "--config"){
             options.need_config = true;
             break;
         } else if (arg == "-h" || arg == "--help") {
@@ -180,10 +190,11 @@ void set_flags(ProgramOptions& options, int argc, char* argv[]) {
             break; 
         } else if (arg == "-v" || arg == "--version") {
             std::cout << "Dendron version: " << DENDRON_VERSION << std::endl;
+        } else if (arg == "--iconsoff") {
+            options.active_icons = false;
         } else {
             
-            // Если аргумент не является флагом, считаем его путем.
-            // Это позволяет пути, указанному в командной строке, переопределить путь из конфига.
+            
             if (fs::exists(arg)) {
                 options.directory_path = arg;
             } else {
@@ -199,6 +210,7 @@ void set_flags(ProgramOptions& options, int argc, char* argv[]) {
 
 
 int main(int argc, char* argv[]) {
+    // auto start = std::chrono::high_resolution_clock::now();
 
     ProgramOptions options;
 
@@ -206,6 +218,7 @@ int main(int argc, char* argv[]) {
 
     set_flags(options, argc, argv);
     
+
     if(options.need_config){
 
 #if defined(_WIN32)
@@ -225,6 +238,7 @@ int main(int argc, char* argv[]) {
                   << "  -f, --files                Ignore files in output\n"
                   << "  -i, --ignore <pattern...>  Ignore files/directories using the pattern\n"
                   << "  -v, --version              Show version\n"
+                  << "  --iconsoff <true/false>       Disable icons\n"
                   << "  --config                   Open configuration file\n"
                   << "  -h, --help                 Show this message\n";
         return 0;
@@ -237,13 +251,34 @@ int main(int argc, char* argv[]) {
 
     const fs::path absolute_current_path = fs::canonical(options.directory_path);
     
+    std::map<std::string, std::string> icons_by_extension;
+    std::string dir_icon;
+    std::string file_icon;
+
+    if (options.active_icons) {
+        auto dir_it = options.icons.find("dir");
+        if (dir_it != options.icons.end()) {
+            dir_icon = dir_it->second;
+            options.icons.erase(dir_it);
+        }
+
+        auto file_it = options.icons.find("file");
+        if (file_it != options.icons.end()) {
+            file_icon = file_it->second;
+            options.icons.erase(file_it);
+        }
+        icons_by_extension = options.icons;
+    }
     
     TreeCLI my_tree(options.max_recursion_depth, options.char_style, 
         options.tree_style, options.ignore_files, options.show_hyperlinks,
-        absolute_current_path, options.ignore_patterns);
+        absolute_current_path, options.ignore_patterns,
+        icons_by_extension, file_icon, dir_icon);
     my_tree.display(options.directory_path);
 
-    
-    
+    // auto end = std::chrono::high_resolution_clock::now();
+    // auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    // std::cout << "Время выполнения: " << duration.count() << " миллисекунд" << std::endl;
     return 0;
 }
