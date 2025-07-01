@@ -7,11 +7,13 @@
 #include "./tree.h"
 #include "./main.h" 
 #include <algorithm>
-
+#include <sys/resource.h> // for testing 
 
 namespace fs = std::filesystem;
 
 std::string DENDRON_VERSION = "1.1.0";
+
+bool testing = false;
 
 std::string trim(const std::string& str) {
     const std::string whitespace = " \t";
@@ -55,7 +57,7 @@ std::string get_config_path() {
     return (fs::current_path() / "configs" / "config.ini").string();
 }
 
-//
+
 void set_config(ProgramOptions& options){
     std::ifstream config_file(get_config_path());
     if(!config_file.is_open()) {
@@ -137,7 +139,7 @@ void set_config(ProgramOptions& options){
         
         }else if (key == "copy_to_clipboard") {
             options.copy_to_clipboard = (value == "true");
-            
+
         } else if(key == "show_hyperlinks"){
             options.show_hyperlinks = (value == "true");
 
@@ -200,7 +202,10 @@ void set_flags(ProgramOptions& options, int argc, char* argv[]) {
 
         } else if (arg == "-f" || arg == "--files") { 
             options.ignore_files = true;
-
+        
+        } else if (arg == "--test"){
+            testing = true;
+    
         } else if (arg == "-i" || arg == "--ignore") {
             while (i + 1 < argc && argv[i + 1][0] != '-') {
                 i++;
@@ -238,10 +243,17 @@ void set_flags(ProgramOptions& options, int argc, char* argv[]) {
 
 
 
-
+long get_peak_memory() {
+        struct rusage usage;
+        getrusage(RUSAGE_SELF, &usage);
+        return usage.ru_maxrss; 
+    }
 
 int main(int argc, char* argv[]) {
-    // auto start = std::chrono::high_resolution_clock::now();
+    
+    auto start = std::chrono::high_resolution_clock::now();
+    
+
 
     ProgramOptions options;
 
@@ -314,12 +326,16 @@ int main(int argc, char* argv[]) {
     if (options.copy_to_clipboard) {
         my_tree.copy_to_clipboard();
     }
+
+    
     
         
-
-    // auto end = std::chrono::high_resolution_clock::now();
-    // auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-
-    // std::cout << "Время выполнения: " << duration.count() << " миллисекунд" << std::endl;
+    
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    if (testing){
+        std::cout << "Peak memory usage: " << get_peak_memory() << "Kb" << "\n"; 
+        std::cout << "Время выполнения: " << duration.count() << " миллисекунд" << std::endl;
+    }
     return 0;
 }
