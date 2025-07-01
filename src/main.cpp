@@ -26,6 +26,7 @@ std::string trim(const std::string& str) {
 }
 
 
+
 //ищет и получает файл конфига 
 std::string get_config_path() {
     fs::path config_path;
@@ -206,7 +207,8 @@ void set_flags(ProgramOptions& options, int argc, char* argv[]) {
         } else if(arg == "--config"){
             options.need_config = true;
             break;
-
+        } else if(arg == "-c" || arg == "--copy"){
+            options.copy_to_clipboard = true;
         } else if (arg == "-h" || arg == "--help") {
             options.need_help = true;
             break; 
@@ -297,10 +299,16 @@ int main(int argc, char* argv[]) {
     }
     
     TreeCLI my_tree(options.max_recursion_depth, options.show_details, options.char_style, 
-        options.tree_style, options.ignore_files, options.show_hyperlinks,
+        options.tree_style, options.ignore_files, options.show_hyperlinks, options.copy_to_clipboard,
         absolute_current_path, options.ignore_patterns, options.details_format,
         icons_by_extension, file_icon, dir_icon);
-    my_tree.display();
+    my_tree.display(options.directory_path.string());
+
+    if (options.copy_to_clipboard) {
+        my_tree.copy_to_clipboard();
+    }
+    
+        
 
     // auto end = std::chrono::high_resolution_clock::now();
     // auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);

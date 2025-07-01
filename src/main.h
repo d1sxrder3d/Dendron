@@ -19,6 +19,7 @@ struct ProgramOptions {
     bool show_hyperlinks = true;  // Default value: show hl
     bool ignore_files = false;    // Default value: don't ignore files
     bool show_details = false;    // Default value: don't show details
+    bool copy_to_clipboard = false; // Default value: don't copy to clipboard
     std::string details_format = "PST";
     std::map<std::string, std::string> icons;
     

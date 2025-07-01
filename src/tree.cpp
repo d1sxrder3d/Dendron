@@ -22,8 +22,8 @@ namespace fs = std::filesystem;
 
 
 TreeCLI::TreeCLI(short int max_recursion_depth, bool show_details,short int char_style, 
-    bool tree_style, bool ignore_files, 
-    bool show_hyperlinks, const fs::path& absolute_current_path, 
+    bool tree_style, bool ignore_files, bool show_hyperlinks, 
+    bool copy_to_clipboard, const fs::path& absolute_current_path, 
     const std::vector<std::string>& ignore_patterns, const std::string& details_format,
     const std::map<std::string, std::string>& icons_by_extension, const std::string& default_file_icon, const std::string& directory_icon)
     : max_recursion_depth_(max_recursion_depth),
@@ -32,6 +32,7 @@ TreeCLI::TreeCLI(short int max_recursion_depth, bool show_details,short int char
       tree_style_(tree_style),
       ignore_files_(ignore_files),
       show_hyperlinks_(show_hyperlinks),
+      copy_to_clipboard_(copy_to_clipboard),
       absolute_current_path_(absolute_current_path),
       ignore_patterns_(ignore_patterns),
       details_format_(details_format),
@@ -44,10 +45,58 @@ TreeCLI::TreeCLI(short int max_recursion_depth, bool show_details,short int char
       directory_icon_(directory_icon) {}
 
 
-void TreeCLI::display() {
+void TreeCLI::copy_to_clipboard(){
+
+    std::string& text = clipboard_output_;
+
+    const char* command = nullptr;
+#if defined(_WIN32)
+    command = "clip";
+#elif defined(__APPLE__)
+    command = "pbcopy";
+#else // Assuming Linux
+    if (system("command -v xclip > /dev/null 2>&1") == 0) {
+        command = "xclip -selection clipboard";
+    } else if (system("command -v xsel > /dev/null 2>&1") == 0) {
+        command = "xsel --clipboard --input";
+    }
+#endif
+
+    if (command == nullptr) {
+#if defined(__linux__)
+        std::cerr << "\nError: To use clipboard functionality, please install 'xclip' or 'xsel'." << std::endl;
+#else
+        std::cerr << "\nError: Clipboard functionality is not supported on this platform." << std::endl;
+#endif
+        return;
+    }
+
+#if defined(_WIN32)
+    FILE* pipe = _popen(command, "w");
+#else
+    FILE* pipe = popen(command, "w");
+#endif
+
+    if (pipe) {
+        fwrite(text.c_str(), 1, text.size(), pipe);
+#if defined(_WIN32)
+        _pclose(pipe);
+#else
+        pclose(pipe);
+#endif
+    } else {
+        std::cerr << "\nError: Could not execute clipboard command." << std::endl;
+    }
+}
+
+
+void TreeCLI::display(const std::string& show_dir_path) {
     if (fs::exists(absolute_current_path_)) {
-        std::cout << absolute_current_path_.string() << std::endl;
+        std::cout << show_dir_path << std::endl;
         std::string prefix; 
+        if (copy_to_clipboard_){
+            clipboard_output_ += show_dir_path + "\n";
+        }
         tree_recursive(absolute_current_path_, prefix, 0);
     } else {
         std::cerr << "Error: Path does not exist: " << absolute_current_path_.string() << std::endl;
@@ -272,7 +321,9 @@ void TreeCLI::tree_recursive(const std::filesystem::path& path, std::string& pre
         
         std::stringstream line_ss;
         line_ss << prefix << (is_last ? br_to_end_obj_ : br_to_obj_) << " ";
-
+        if (copy_to_clipboard_){
+            clipboard_output_ += line_ss.str();
+        }
         
 
         fs::file_status status;
@@ -293,8 +344,13 @@ void TreeCLI::tree_recursive(const std::filesystem::path& path, std::string& pre
         if (this->show_hyperlinks_ && fs::is_regular_file(status)) {
             line_ss << "\e]8;;file://" << entry.path().string() 
                       << "\a" << entry.path().filename().string() << "\e]8;;\a";
+
         } else {
             line_ss << entry.path().filename().string();
+        }
+
+        if (copy_to_clipboard_){
+            clipboard_output_ += entry.path().filename().string() + "\n";
         }
 
         if (show_details_) {

@@ -10,7 +10,7 @@
 class TreeCLI{
 public:
     explicit TreeCLI(short int max_recursion_depth, bool show_details, short int char_style, 
-        bool tree_style, bool ignore_files, bool show_hyperlinks ,
+        bool tree_style, bool ignore_files, bool show_hyperlinks , bool copy_to_clipboard,
         const std::filesystem::path& absolute_current_path, const std::vector<std::string>& ignore_patterns, 
         const std::string& details_format, const std::map<std::string, std::string>& icons_by_extension, 
         const std::string& default_file_icon, const std::string& directory_icon);
@@ -19,7 +19,9 @@ public:
       @brief Отображает дерево директорий для указанного пути.
       @param directory_path Путь к директории для отображения.
      */
-    void display();
+    void display(const std::string& show_dir_path);
+
+    void copy_to_clipboard();
 
 
 private:
@@ -42,7 +44,7 @@ private:
     static std::string format_group(gid_t gid);
 #endif
 
-
+    std::string clipboard_output_;
 
 
     //Массив стилей псевдографики
@@ -85,9 +87,11 @@ private:
     const bool tree_style_;         
     const bool ignore_files_;
     const bool show_hyperlinks_;
+    const bool copy_to_clipboard_;
     const std::filesystem::path& absolute_current_path_;
     const std::vector<std::string> ignore_patterns_;
     const std::string details_format_;
+
 
     // Derived/internal state
     const std::string absolute_current_path_str_;

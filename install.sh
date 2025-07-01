@@ -18,6 +18,17 @@ echo "Building the project..."
 make clean
 make
 
+echo "Checking for optional dependencies..."
+if [[ "$(uname)" == "Linux" ]]; then
+    if ! command -v xclip &> /dev/null && ! command -v xsel &> /dev/null; then
+        echo "⚠️  Warning: 'xclip' or 'xsel' not found."
+        echo "   To use the clipboard copy feature (-c, --copy), please install one of them."
+        echo "   - On Debian/Ubuntu: sudo apt-get install xclip"
+        echo "   - On Fedora:        sudo dnf install xclip"
+        echo "   - On Arch Linux:    sudo pacman -S xclip"
+    fi
+fi
+
 echo "Installing ${TARGET} to ${INSTALL_PATH}..."
 echo "This may require administrator privileges."
 sudo install -m 755 "$TARGET" "$INSTALL_PATH"
