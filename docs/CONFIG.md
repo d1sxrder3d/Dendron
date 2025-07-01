@@ -38,6 +38,7 @@ Detailed information about config settings
 - true - show only directories
 - false - show files and directories
 
+
 #### Icons
 
 To display icons correctly, you need to have a [Nerd Font](https://www.nerdfonts.com/) installed and selected in your terminal.
@@ -49,6 +50,7 @@ To display icons correctly, you need to have a [Nerd Font](https://www.nerdfonts
 
 - true - display icons
 - false - do not display icons
+
 
 #### `icon_* = <icon>`
 
@@ -83,23 +85,35 @@ You can add any extensions you need.
 - main* - all files and directories beginning with main will be ignored
 - \*vscode* - all files and directories with substring "vscode" will be ignored
 
-# default directory (unrecommended to change)
+
+#### default directory (unrecommended to change)
 #### `default_directory = ./`
 
 **Sets the default value for building the tree if the directory is not specified.**
 
-# Whether to output files as hyperlinks
+
+#### Whether to output files as hyperlinks
 **Are files clickable?**
 #### `show_hyperlinks = true/false`
 
 - true - clickables
 - false - not clickables
 
+
 #### Show details by default
 #### `show_details = true/false`
 
 - `true` - show details.
 - `false` - do not show details.
+
+
+#### Whether to copy output to the clipboard by default
+#### `copy_to_clipboard = true/false`
+
+- `true` - always copy output to the clipboard. Equivalent to always using the `-c` or `--copy` flag.
+- `false` - do not copy output by default.
+
+(Default: `false`)
 
 
 #### Details output format

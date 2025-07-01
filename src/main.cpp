@@ -134,7 +134,10 @@ void set_config(ProgramOptions& options){
 
         } else if(key == "active_icons"){
             options.active_icons = (value == "true");
-
+        
+        }else if (key == "copy_to_clipboard") {
+            options.copy_to_clipboard = (value == "true");
+            
         } else if(key == "show_hyperlinks"){
             options.show_hyperlinks = (value == "true");
 
@@ -250,7 +253,10 @@ int main(int argc, char* argv[]) {
     if(options.need_config){
 
 #if defined(_WIN32)
+    // TODO: Implement for Windows
 #elif defined(__APPLE__)
+    std::string command = "open \"" + get_config_path() + "\"";
+    std::system(command.c_str());
 #else
     std::system("nano ~/.config/dendron/config.ini");
 #endif
@@ -265,6 +271,7 @@ int main(int argc, char* argv[]) {
                   << "  -t, --tree                 Sort files before directories\n"
                   << "  -f, --files                Ignore files in output\n"
                   << "  -i, --ignore <pattern...>  Ignore files/directories using the pattern\n"
+                  << "  -c, --copy                 Copy tree to clipboard\n"
                   << "  -v, --version              Show version\n"
                   << "  --iconsoff <true/false>    Disable icons\n"
                   << "  --config                   Open configuration file\n"

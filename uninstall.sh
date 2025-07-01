@@ -23,13 +23,19 @@ if [ -f "$MAKEFILE" ]; then
     make clean
 fi
 
-CONFIG_DIR="$HOME/.config/dendron"
+# Determine config directory based on OS
+if [[ "$(uname)" == "Darwin" ]]; then
+    CONFIG_DIR="$HOME/Library/Application Support/dendron"
+else # Assume Linux/other Unix-like
+    CONFIG_DIR="$HOME/.config/dendron"
+fi
+
 CONFIG_FILE="${CONFIG_DIR}/config.ini"
 if [ -f "$CONFIG_FILE" ]; then
     echo "Removing default configuration file..."
     rm "$CONFIG_FILE"
     echo "✅ Default configuration file removed."
-    # Попытка удалить директорию конфигурации, если она пуста
+    # Attempt to remove the configuration directory if it is empty
     rmdir "$CONFIG_DIR" 2>/dev/null && echo "✅ Removed empty configuration directory." || true
 fi
 
