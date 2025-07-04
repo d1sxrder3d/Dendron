@@ -16,6 +16,7 @@ struct ProgramOptions {
     bool active_icons = true;     // Default value: show icons
     bool need_help = false;       // Default value: no help needed
     bool need_config = false;     // Default value: no config needed
+    bool need_version = false;    // Default value: no version needed
     bool show_hyperlinks = true;  // Default value: show hl
     bool ignore_files = false;    // Default value: don't ignore files
     bool show_details = false;    // Default value: don't show details

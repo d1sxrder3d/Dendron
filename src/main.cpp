@@ -222,7 +222,8 @@ void set_flags(ProgramOptions& options, int argc, char* argv[]) {
             break; 
 
         } else if (arg == "-v" || arg == "--version") {
-            std::cout << "Dendron version: " << DENDRON_VERSION << std::endl;
+            options.need_version = true;
+            break;
 
         } else if (arg == "--iconsoff") {
             options.active_icons = false;
@@ -247,7 +248,7 @@ long get_peak_memory() {
         struct rusage usage;
         getrusage(RUSAGE_SELF, &usage);
         return usage.ru_maxrss; 
-    }
+}
 
 int main(int argc, char* argv[]) {
     
@@ -275,7 +276,8 @@ int main(int argc, char* argv[]) {
         return 0;
     }
     if (options.need_help) {
-        std::cout << "Usage: ./tree_cli [path] [options]\n"
+        std::cout << "Dendron is a simple cli utility for displaying files and directories in a tree format.\n \n" 
+                  << "Usage: dendron [path] [options]\n"
                   << "Options:\n"
                   << "  -r, --recursion <number>   Set maximum recursion depth\n"
                   << "  -d, --details              Show details of files and directories (permissions, size, etc.)\n"
@@ -288,6 +290,10 @@ int main(int argc, char* argv[]) {
                   << "  --iconsoff <true/false>    Disable icons\n"
                   << "  --config                   Open configuration file\n"
                   << "  -h, --help                 Show this message\n";
+        return 0;
+    }
+    else if (options.need_version) {
+        std::cout << "Dendron version: " << DENDRON_VERSION << std::endl;
         return 0;
     }
     
@@ -335,7 +341,7 @@ int main(int argc, char* argv[]) {
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     if (testing){
         std::cout << "Peak memory usage: " << get_peak_memory() << "Kb" << "\n"; 
-        std::cout << "Время выполнения: " << duration.count() << " миллисекунд" << std::endl;
+        std::cout << "Time of execution: " << duration.count() << " ms" << std::endl;
     }
     return 0;
 }
