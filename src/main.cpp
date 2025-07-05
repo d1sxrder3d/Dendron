@@ -1,17 +1,15 @@
 #include <iostream>
 #include <filesystem>
 #include <fstream>
-#include <sstream>
-#include <cstdlib>
-#include <chrono>
-#include "./tree.h"
-#include "./main.h" 
-#include <algorithm>
-
+#include "../include/tree.h"
+#include "../include/main.h" 
+#include <sys/resource.h> // for testing 
 
 namespace fs = std::filesystem;
 
-std::string DENDRON_VERSION = "1.1.0";
+std::string DENDRON_VERSION = "1.2.0";
+
+bool testing = false;
 
 std::string trim(const std::string& str) {
     const std::string whitespace = " \t";
@@ -24,6 +22,7 @@ std::string trim(const std::string& str) {
 
     return str.substr(strBegin, strRange);
 }
+
 
 
 //ищет и получает файл конфига 
@@ -54,7 +53,7 @@ std::string get_config_path() {
     return (fs::current_path() / "configs" / "config.ini").string();
 }
 
-//
+
 void set_config(ProgramOptions& options){
     std::ifstream config_file(get_config_path());
     if(!config_file.is_open()) {
@@ -133,6 +132,9 @@ void set_config(ProgramOptions& options){
 
         } else if(key == "active_icons"){
             options.active_icons = (value == "true");
+        
+        }else if (key == "copy_to_clipboard") {
+            options.copy_to_clipboard = (value == "true");
 
         } else if(key == "show_hyperlinks"){
             options.show_hyperlinks = (value == "true");
@@ -196,7 +198,10 @@ void set_flags(ProgramOptions& options, int argc, char* argv[]) {
 
         } else if (arg == "-f" || arg == "--files") { 
             options.ignore_files = true;
-
+        
+        } else if (arg == "--test"){
+            testing = true;
+    
         } else if (arg == "-i" || arg == "--ignore") {
             while (i + 1 < argc && argv[i + 1][0] != '-') {
                 i++;
@@ -206,13 +211,21 @@ void set_flags(ProgramOptions& options, int argc, char* argv[]) {
         } else if(arg == "--config"){
             options.need_config = true;
             break;
-
+        } else if (arg == "--json") {
+            options.generate_json = true;
+            // check for optional filename
+            if (i + 1 < argc && argv[i + 1][0] != '-') {
+                options.json_output_path = argv[++i];
+            }
+        } else if(arg == "-c" || arg == "--copy"){
+            options.copy_to_clipboard = true;
         } else if (arg == "-h" || arg == "--help") {
             options.need_help = true;
             break; 
 
         } else if (arg == "-v" || arg == "--version") {
-            std::cout << "Dendron version: " << DENDRON_VERSION << std::endl;
+            options.need_version = true;
+            break;
 
         } else if (arg == "--iconsoff") {
             options.active_icons = false;
@@ -233,10 +246,17 @@ void set_flags(ProgramOptions& options, int argc, char* argv[]) {
 
 
 
-
+long get_peak_memory() {
+        struct rusage usage;
+        getrusage(RUSAGE_SELF, &usage);
+        return usage.ru_maxrss; 
+}
 
 int main(int argc, char* argv[]) {
-    // auto start = std::chrono::high_resolution_clock::now();
+    
+    auto start = std::chrono::high_resolution_clock::now();
+    
+
 
     ProgramOptions options;
 
@@ -248,14 +268,18 @@ int main(int argc, char* argv[]) {
     if(options.need_config){
 
 #if defined(_WIN32)
+    // TODO: Implement for Windows
 #elif defined(__APPLE__)
+    std::string command = "open \"" + get_config_path() + "\"";
+    std::system(command.c_str());
 #else
     std::system("nano ~/.config/dendron/config.ini");
 #endif
         return 0;
     }
     if (options.need_help) {
-        std::cout << "Usage: ./tree_cli [path] [options]\n"
+        std::cout << "Dendron is a simple cli utility for displaying files and directories in a tree format.\n \n" 
+                  << "Usage: dendron [path] [options]\n"
                   << "Options:\n"
                   << "  -r, --recursion <number>   Set maximum recursion depth\n"
                   << "  -d, --details              Show details of files and directories (permissions, size, etc.)\n"
@@ -263,10 +287,16 @@ int main(int argc, char* argv[]) {
                   << "  -t, --tree                 Sort files before directories\n"
                   << "  -f, --files                Ignore files in output\n"
                   << "  -i, --ignore <pattern...>  Ignore files/directories using the pattern\n"
+                  << "  -c, --copy                 Copy tree to clipboard\n"
                   << "  -v, --version              Show version\n"
+                  << "  --json [filename]          Generate a JSON representation of the tree\n"
                   << "  --iconsoff <true/false>    Disable icons\n"
                   << "  --config                   Open configuration file\n"
                   << "  -h, --help                 Show this message\n";
+        return 0;
+    }
+    else if (options.need_version) {
+        std::cout << "Dendron version: " << DENDRON_VERSION << std::endl;
         return 0;
     }
     
@@ -296,15 +326,35 @@ int main(int argc, char* argv[]) {
         icons_by_extension = options.icons;
     }
     
+    if(options.json_output_path.find(".json") > options.json_output_path.length()){
+            options.json_output_path += ".json";
+    }
+    
     TreeCLI my_tree(options.max_recursion_depth, options.show_details, options.char_style, 
-        options.tree_style, options.ignore_files, options.show_hyperlinks,
+        options.tree_style, options.ignore_files, options.show_hyperlinks, options.copy_to_clipboard,
         absolute_current_path, options.ignore_patterns, options.details_format,
         icons_by_extension, file_icon, dir_icon);
-    my_tree.display();
+    my_tree.display(options.directory_path);
 
-    // auto end = std::chrono::high_resolution_clock::now();
-    // auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    if (options.copy_to_clipboard) {
+        my_tree.copy_to_clipboard();
+    }
 
-    // std::cout << "Время выполнения: " << duration.count() << " миллисекунд" << std::endl;
+    if (options.generate_json) {
+        
+
+        my_tree.make_json(options.json_output_path);
+    }
+
+    
+    
+        
+    
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    if (testing){
+        std::cout << "Peak memory usage: " << get_peak_memory() << "Kb" << "\n"; 
+        std::cout << "Time of execution: " << duration.count() << " ms" << std::endl;
+    }
     return 0;
 }

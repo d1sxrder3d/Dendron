@@ -56,13 +56,15 @@ $ dendron . -r 1
 - 🖱️ **Clickable file links** in supported terminals.
 - ✨ **Icon support** for files and directories (requires a Nerd Font).
 - 🔍 **Pattern filtering** to exclude unwanted entries.
-- ℹ️ **File details**: Option to show file sizes and permissions.
+- ℹ️ **File details** Option to show file sizes and permissions.
 - ↕️ **Flexible sorting** (files before or after directories).
+- 📋 **Clipboard integration** Copy the output directly to the clipboard with `-c`/`--copy` or by default via config.
+- 📤 **Alternative output formats** Export the tree structure to JSON.
 - ⚙️ **Performance** High performance thanks to C++17
 
 ### Planned
-- 📤 **Alternative output formats**: Export the tree structure to JSON or XML.
-- 💻 **Windows and masOS support**
+
+- 💻 **Integration with git** Display git repositories and information about recent changes to files.
 
 ## 🚀 Getting Started
 
@@ -71,7 +73,7 @@ $ dendron . -r 1
 - `make` build system (optional, for convenience).
 - "Nerd fonts" for displaying icons (optional).
 
-### Installation (Linux)
+### Installation (Linux & macOS)
 
 1.  Clone the repository:
     ```sh
@@ -82,7 +84,7 @@ $ dendron . -r 1
     ```sh
     ./install.sh
     ```
-    *Note: The script may ask for your password to install the application system-wide.*
+    *Note: The script may ask for your password to install the application system-wide (`/usr/local/bin`).*
 
 ### Manual Compilation
 You can also compile the project manually:
@@ -103,11 +105,14 @@ dendron [path] [options]
 | `-d`    | `--details`  | Show details of files and directories.     |
 | `-t`           | `--tree`              | Sort files before directories.                                           |
 | `-s <0-2>`     | `--style <0-2>`       | Display style. |
-| `-i <pattern>` | `--ignore <pattern>`  | Ignoring files/directories by pattern. |
-| `-f`           | `--files`             | Disable display of files in the tree. |
-|| `--config`            | Open configuration file             |
-|| `--iconsoff`          | Disable icon display             |
-| `-h`           | `--help`              | Show the help message.                                                   |
+| `-i <pattern...>` | `--ignore <pattern...>`  | Ignore files/directories using the pattern. |
+| `-f`           | `--files`             | Ignore files in output. |
+| `-c`           | `--copy`              | Copy output to clipboard. |
+| `-v`           | `--version`           | Show version. |
+|| `--json [filename]`| Generate a JSON representation of the tree |
+|                | `--iconsoff`          | Disable icons.             |
+|                | `--config`            | Open configuration file.             |
+| `-h`           | `--help`              | Show this help message.                                                   |
 
 ### Examples
 1.  Display the tree for the current directory:

@@ -7,6 +7,13 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.2.0] - 2025-07-05
+### Added
+- **Export to JSON**: Added the ability to export directory structure to a JSON file using the `--json [filename]` flag.
+- **Clipboard integration**: Added the ability to copy output to the clipboard using the `-c`/`--copy` flag
+- **MacOS support**
+
+
 ## [1.1.0] - 2025-07-01
 ### Added
 - **Icon support**: Display icons for files and directories (requires a Nerd Font).

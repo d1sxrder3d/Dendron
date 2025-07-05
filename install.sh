@@ -5,7 +5,7 @@ set -e
 TARGET="dendron"
 INSTALL_PATH="/usr/local/bin"
 MAKEFILE="Makefile"
-VERSION="1.1.0"
+VERSION="1.2.0"
 
 echo "Starting the installation of ${TARGET} version ${VERSION}..."
 
@@ -18,13 +18,33 @@ echo "Building the project..."
 make clean
 make
 
+echo "Checking for optional dependencies..."
+OS_NAME=$(uname)
+if [[ "$OS_NAME" == "Linux" ]]; then
+    if ! command -v xclip &> /dev/null && ! command -v xsel &> /dev/null; then
+        echo "⚠️  Warning: 'xclip' or 'xsel' not found."
+        echo "   To use the clipboard copy feature (-c, --copy), please install one of them."
+        echo "   - On Debian/Ubuntu: sudo apt-get install xclip"
+        echo "   - On Fedora:        sudo dnf install xclip"
+        echo "   - On Arch Linux:    sudo pacman -S xclip"
+    fi
+elif [[ "$OS_NAME" == "Darwin" ]]; then
+    echo "ℹ️  On macOS, the clipboard copy feature (-c, --copy) uses the built-in 'pbcopy' utility."
+fi
+
 echo "Installing ${TARGET} to ${INSTALL_PATH}..."
 echo "This may require administrator privileges."
 sudo install -m 755 "$TARGET" "$INSTALL_PATH"
 
 echo "Installing configuration files..."
 SOURCE_CONFIG="configs/config.ini"
-CONFIG_DIR="$HOME/.config/dendron"
+
+# Determine config directory based on OS
+if [[ "$(uname)" == "Darwin" ]]; then
+    CONFIG_DIR="$HOME/Library/Application Support/dendron"
+else # Assume Linux/other Unix-like
+    CONFIG_DIR="$HOME/.config/dendron"
+fi
 
 if [ -f "$SOURCE_CONFIG" ]; then
     mkdir -p "$CONFIG_DIR"
