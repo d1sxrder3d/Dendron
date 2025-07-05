@@ -4,14 +4,15 @@
 #include <vector>
 #include <map>
 #include <string>
+#include "../include/json.hpp"
 
-
+namespace fs = std::filesystem;
 
 class TreeCLI{
 public:
     explicit TreeCLI(short int max_recursion_depth, bool show_details, short int char_style, 
         bool tree_style, bool ignore_files, bool show_hyperlinks , bool copy_to_clipboard,
-        const std::filesystem::path& absolute_current_path, const std::vector<std::string>& ignore_patterns, 
+        const fs::path& absolute_current_path, const std::vector<std::string>& ignore_patterns, 
         const std::string& details_format, const std::map<std::string, std::string>& icons_by_extension, 
         const std::string& default_file_icon, const std::string& directory_icon);
 
@@ -19,9 +20,11 @@ public:
       @brief Отображает дерево директорий для указанного пути.
       @param directory_path Путь к директории для отображения.
      */
-    void display(const std::string& show_dir_path);
+    void display(const std::string& show_dir_path) const;
 
-    void copy_to_clipboard();
+    void copy_to_clipboard() const;
+
+    void make_json(const std::string& output_path) const;
 
 
 private:
@@ -29,22 +32,22 @@ private:
     static bool check_pattern(const Range& patterns, std::string_view filename);
 
     bool should_ignore(std::string_view filename) const;
-    const char* get_entry_color(const std::filesystem::directory_entry& entry, std::filesystem::file_status status) const;
+    const char* get_entry_color(const fs::directory_entry& entry, fs::file_status status) const;
 
-    std::string get_icon(const std::filesystem::directory_entry& entry) const;
+    std::string get_icon(const fs::directory_entry& entry) const;
 
-    void tree_recursive(const std::filesystem::path& path, std::string& prefix, int current_depth);
+    void tree_recursive(const fs::path& path, std::string& prefix, int current_depth) const;
+    nlohmann::json build_json_tree(const fs::path& path, int current_depth) const;
 
-
-    static std::string format_permissions(std::filesystem::perms p, bool is_dir, bool is_symlink);
+    static std::string format_permissions(fs::perms p, bool is_dir, bool is_symlink);
     static std::string format_size(uintmax_t size);
-    static std::string format_time(std::filesystem::file_time_type ftime);
+    static std::string format_time(fs::file_time_type ftime);
 #if defined(__unix__) || defined(__APPLE__)
     static std::string format_owner(uid_t uid);
     static std::string format_group(gid_t gid);
 #endif
 
-    std::string clipboard_output_;
+    mutable std::string output_;
 
 
     //Массив стилей псевдографики
@@ -87,8 +90,8 @@ private:
     const bool tree_style_;         
     const bool ignore_files_;
     const bool show_hyperlinks_;
-    const bool copy_to_clipboard_;
-    const std::filesystem::path& absolute_current_path_;
+    bool copy_to_clipboard_;
+    const fs::path absolute_current_path_;
     const std::vector<std::string> ignore_patterns_;
     const std::string details_format_;
 

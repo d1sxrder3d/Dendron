@@ -1,17 +1,13 @@
 #include <iostream>
 #include <filesystem>
 #include <fstream>
-#include <sstream>
-#include <cstdlib>
-#include <chrono>
-#include "./tree.h"
-#include "./main.h" 
-#include <algorithm>
+#include "../include/tree.h"
+#include "../include/main.h" 
 #include <sys/resource.h> // for testing 
 
 namespace fs = std::filesystem;
 
-std::string DENDRON_VERSION = "1.1.0";
+std::string DENDRON_VERSION = "1.2.0";
 
 bool testing = false;
 
@@ -215,6 +211,12 @@ void set_flags(ProgramOptions& options, int argc, char* argv[]) {
         } else if(arg == "--config"){
             options.need_config = true;
             break;
+        } else if (arg == "--json") {
+            options.generate_json = true;
+            // check for optional filename
+            if (i + 1 < argc && argv[i + 1][0] != '-') {
+                options.json_output_path = argv[++i];
+            }
         } else if(arg == "-c" || arg == "--copy"){
             options.copy_to_clipboard = true;
         } else if (arg == "-h" || arg == "--help") {
@@ -287,6 +289,7 @@ int main(int argc, char* argv[]) {
                   << "  -i, --ignore <pattern...>  Ignore files/directories using the pattern\n"
                   << "  -c, --copy                 Copy tree to clipboard\n"
                   << "  -v, --version              Show version\n"
+                  << "  --json [filename]          Generate a JSON representation of the tree\n"
                   << "  --iconsoff <true/false>    Disable icons\n"
                   << "  --config                   Open configuration file\n"
                   << "  -h, --help                 Show this message\n";
@@ -323,14 +326,24 @@ int main(int argc, char* argv[]) {
         icons_by_extension = options.icons;
     }
     
+    if(options.json_output_path.find(".json") > options.json_output_path.length()){
+            options.json_output_path += ".json";
+    }
+    
     TreeCLI my_tree(options.max_recursion_depth, options.show_details, options.char_style, 
         options.tree_style, options.ignore_files, options.show_hyperlinks, options.copy_to_clipboard,
         absolute_current_path, options.ignore_patterns, options.details_format,
         icons_by_extension, file_icon, dir_icon);
-    my_tree.display(options.directory_path.string());
+    my_tree.display(options.directory_path);
 
     if (options.copy_to_clipboard) {
         my_tree.copy_to_clipboard();
+    }
+
+    if (options.generate_json) {
+        
+
+        my_tree.make_json(options.json_output_path);
     }
 
     

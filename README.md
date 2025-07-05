@@ -56,14 +56,15 @@ $ dendron . -r 1
 - 🖱️ **Clickable file links** in supported terminals.
 - ✨ **Icon support** for files and directories (requires a Nerd Font).
 - 🔍 **Pattern filtering** to exclude unwanted entries.
-- ℹ️ **File details**: Option to show file sizes and permissions.
+- ℹ️ **File details** Option to show file sizes and permissions.
 - ↕️ **Flexible sorting** (files before or after directories).
-- 📋 **Clipboard integration**: Copy the output directly to the clipboard with `-c`/`--copy` or by default via config.
+- 📋 **Clipboard integration** Copy the output directly to the clipboard with `-c`/`--copy` or by default via config.
+- 📤 **Alternative output formats** Export the tree structure to JSON.
 - ⚙️ **Performance** High performance thanks to C++17
 
 ### Planned
-- 📤 **Alternative output formats**: Export the tree structure to XML.
-- 💻 **Windows support**
+
+- 💻 **Integration with git** Display git repositories and information about recent changes to files.
 
 ## 🚀 Getting Started
 
@@ -108,6 +109,7 @@ dendron [path] [options]
 | `-f`           | `--files`             | Ignore files in output. |
 | `-c`           | `--copy`              | Copy output to clipboard. |
 | `-v`           | `--version`           | Show version. |
+|| `--json [filename]`| Generate a JSON representation of the tree |
 |                | `--iconsoff`          | Disable icons.             |
 |                | `--config`            | Open configuration file.             |
 | `-h`           | `--help`              | Show this help message.                                                   |

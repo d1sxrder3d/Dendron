@@ -5,7 +5,7 @@ set -e
 TARGET="dendron"
 INSTALL_PATH="/usr/local/bin"
 MAKEFILE="Makefile"
-VERSION="1.1.0"
+VERSION="1.2.0"
 
 echo "Starting the installation of ${TARGET} version ${VERSION}..."
 

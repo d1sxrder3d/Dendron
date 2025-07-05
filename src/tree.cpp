@@ -1,15 +1,11 @@
-#include "./tree.h" 
+#include "../include/tree.h" 
+#include "../include/json.hpp"
 
+#include <fstream>
 #include <iostream>
 #include <vector>
 #include <string>
-#include <map>
 #include <string_view>
-#include <algorithm>
-#include <optional>
-#include <iomanip>
-#include <ctime>
-#include <chrono>
 
 #if defined(__unix__) || defined(__APPLE__)
 #include <sys/stat.h>
@@ -18,7 +14,7 @@
 #endif
 
 namespace fs = std::filesystem;
-
+using json = nlohmann::json;
 
 
 TreeCLI::TreeCLI(short int max_recursion_depth, bool show_details,short int char_style, 
@@ -45,63 +41,6 @@ TreeCLI::TreeCLI(short int max_recursion_depth, bool show_details,short int char
       directory_icon_(directory_icon) {}
 
 
-void TreeCLI::copy_to_clipboard(){
-
-    std::string& text = clipboard_output_;
-
-    const char* command = nullptr;
-#if defined(_WIN32)
-    command = "clip";
-#elif defined(__APPLE__)
-    command = "pbcopy";
-#else // Assuming Linux
-    if (system("command -v xclip > /dev/null 2>&1") == 0) {
-        command = "xclip -selection clipboard";
-    } else if (system("command -v xsel > /dev/null 2>&1") == 0) {
-        command = "xsel --clipboard --input";
-    }
-#endif
-
-    if (command == nullptr) {
-#if defined(__linux__)
-        std::cerr << "\nError: To use clipboard functionality, please install 'xclip' or 'xsel'." << std::endl;
-#else
-        std::cerr << "\nError: Clipboard functionality is not supported on this platform." << std::endl;
-#endif
-        return;
-    }
-
-#if defined(_WIN32)
-    FILE* pipe = _popen(command, "w");
-#else
-    FILE* pipe = popen(command, "w");
-#endif
-
-    if (pipe) {
-        fwrite(text.c_str(), 1, text.size(), pipe);
-#if defined(_WIN32)
-        _pclose(pipe);
-#else
-        pclose(pipe);
-#endif
-    } else {
-        std::cerr << "\nError: Could not execute clipboard command." << std::endl;
-    }
-}
-
-
-void TreeCLI::display(const std::string& show_dir_path) {
-    if (fs::exists(absolute_current_path_)) {
-        std::cout << show_dir_path << std::endl;
-        std::string prefix; 
-        if (copy_to_clipboard_){
-            clipboard_output_ += show_dir_path + "\n";
-        }
-        tree_recursive(absolute_current_path_, prefix, 0);
-    } else {
-        std::cerr << "Error: Path does not exist: " << absolute_current_path_.string() << std::endl;
-    }
-}
 
 template<typename Range>
 bool TreeCLI::check_pattern(const Range& patterns, std::string_view filename) {
@@ -281,7 +220,139 @@ std::string TreeCLI::format_group(gid_t gid) {
 #endif
 
 
-void TreeCLI::tree_recursive(const std::filesystem::path& path, std::string& prefix, int current_depth) {
+json TreeCLI::build_json_tree(const fs::path& path, int current_depth) const {
+    if (max_recursion_depth_ != -1 && current_depth >= max_recursion_depth_) {
+        return nullptr;
+    }
+
+    std::vector<fs::directory_entry> entries;
+    try {
+        for (const auto& entry : fs::directory_iterator(path)) {
+            if (should_ignore(entry.path().filename().string())) {
+                continue;
+            }
+            if (!ignore_files_ || entry.is_directory()) {
+                entries.push_back(entry);
+            }
+        }
+    } catch (const fs::filesystem_error&) {
+        return nullptr;
+    }
+
+    std::sort(entries.begin(), entries.end(),
+        [this](const fs::directory_entry& a, const fs::directory_entry& b) {
+            const bool a_is_dir = a.is_directory();
+            const bool b_is_dir = b.is_directory();
+            if (a_is_dir != b_is_dir) {
+                return this->tree_style_ ? (a_is_dir < b_is_dir) : (a_is_dir > b_is_dir);
+            }
+            return a.path().filename() < b.path().filename();
+        });
+
+    json children = json::array();
+
+    for (const auto& entry : entries) {
+        json node;
+        node["name"] = entry.path().filename().string();
+        if (entry.is_directory()) {
+            node["type"] = "directory";
+            json grandchildren = build_json_tree(entry.path(), current_depth + 1);
+            if (!grandchildren.is_null() && !grandchildren.empty()) {
+                node["children"] = grandchildren;
+            }
+        } else {
+            node["type"] = "file";
+        }
+        children.push_back(node);
+    }
+
+    return children;
+}
+
+void TreeCLI::make_json(const std::string& output_path) const {
+    json root;
+    root["name"] = absolute_current_path_.filename().string();
+    root["type"] = "directory";
+    root["path"] = absolute_current_path_.string();
+
+    json children = build_json_tree(absolute_current_path_, 0);
+    if (!children.is_null()) {
+        root["children"] = children;
+    }
+
+    std::ofstream file(output_path);
+    if (file.is_open()) {
+        file << root.dump(4); 
+        std::cout << "JSON tree has been generated to " << output_path << std::endl;
+    } else{
+        std::cerr << "Error: Unable to open file for writing: " << output_path << std::endl;
+    }
+}
+
+
+
+
+void TreeCLI::copy_to_clipboard() const {
+    const std::string& text = output_;
+
+    const char* command = nullptr;
+#if defined(_WIN32)
+    command = "clip";
+#elif defined(__APPLE__)
+    command = "pbcopy";
+#else // Assuming Linux
+    if (system("command -v xclip > /dev/null 2>&1") == 0) {
+        command = "xclip -selection clipboard";
+    } else if (system("command -v xsel > /dev/null 2>&1") == 0) {
+        command = "xsel --clipboard --input";
+    }
+#endif
+
+    if (command == nullptr) {
+#if defined(__linux__)
+        std::cerr << "\nError: To use clipboard functionality, please install 'xclip' or 'xsel'." << std::endl;
+#else
+        std::cerr << "\nError: Clipboard functionality is not supported on this platform." << std::endl;
+#endif
+        return;
+    }
+
+#if defined(_WIN32)
+    FILE* pipe = _popen(command, "w");
+#else
+    FILE* pipe = popen(command, "w");
+#endif
+
+    if (pipe) {
+        fwrite(text.c_str(), 1, text.size(), pipe);
+#if defined(_WIN32)
+        _pclose(pipe);
+#else
+        pclose(pipe);
+#endif
+    } else {
+        std::cerr << "\nError: Could not execute clipboard command." << std::endl;
+    }
+}
+
+
+void TreeCLI::display(const std::string& show_dir_path) const {
+    output_.clear();
+
+    if (fs::exists(absolute_current_path_)) {
+        std::cout << show_dir_path << std::endl;
+        std::string prefix; 
+        if (copy_to_clipboard_){
+            output_ += show_dir_path + "\n";
+        }
+        tree_recursive(absolute_current_path_, prefix, 0);
+    } else {
+        std::cerr << "Error: Path does not exist: " << absolute_current_path_.string() << std::endl;
+    }
+}
+
+
+void TreeCLI::tree_recursive(const std::filesystem::path& path, std::string& prefix, int current_depth) const {
     
     if (max_recursion_depth_ != -1 && current_depth >= max_recursion_depth_) {
         return;
@@ -321,9 +392,8 @@ void TreeCLI::tree_recursive(const std::filesystem::path& path, std::string& pre
         
         std::stringstream line_ss;
         line_ss << prefix << (is_last ? br_to_end_obj_ : br_to_obj_) << " ";
-        if (copy_to_clipboard_){
-            clipboard_output_ += line_ss.str();
-        }
+        output_ += line_ss.str();
+
         
 
         fs::file_status status;
@@ -349,9 +419,8 @@ void TreeCLI::tree_recursive(const std::filesystem::path& path, std::string& pre
             line_ss << entry.path().filename().string();
         }
 
-        if (copy_to_clipboard_){
-            clipboard_output_ += entry.path().filename().string() + "\n";
-        }
+        output_ += entry.path().filename().string();
+
 
         if (show_details_) {
             line_ss << " ";
@@ -423,6 +492,7 @@ void TreeCLI::tree_recursive(const std::filesystem::path& path, std::string& pre
         }
 
         line_ss << TreeCLI::COLOR_RESET;
+        output_ += "\n";
         std::cout << line_ss.str() << std::endl;
 
         
